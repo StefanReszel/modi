@@ -1,0 +1,12 @@
+<div class="border border-2 border-success mt-1 p-1 m-md-4 p-md-4 rounded-3 w-50 w-lg-auto-none">
+    <div class="form-control border-0 fs-5 bg-light">
+        Czy na pewno, że chcesz usunąć <em class="text-success">{{ object }}</em> ?
+        <br>
+        Wszystkie powiązane dane zostaną trwale usunięte.
+    </div>
+    <form class="d-flex justify-content-around" action="{% url 'dictionary:'|add:action object.id %}" method="post">
+        <input class="btn btn-lg btn-outline-danger mt-2" type="submit" value="Tak">
+        <a class="btn btn-lg btn-outline-success mt-2" href="{{ redirect }}">Nie</a>
+        {% csrf_token %}
+    </form>
+</div>

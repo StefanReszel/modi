@@ -1,0 +1,21 @@
+{% extends 'modi/base.html' %}
+
+
+{% block title %}Nowy temat{% endblock %}
+
+{% block top_bar_content %}
+<li class="breadcrumb-item "></li>
+<li class="breadcrumb-item text-light">Dodaj temat</li>
+{% endblock %}
+    
+{% block side_bar_content %}
+{% endblock  %}
+
+{% block main_content %}
+    <form class="border border-2 border-success mt-1 p-1 m-md-4 p-md-4 rounded-3 w-50 w-lg-auto-none" action="." method="post">
+        {% csrf_token %}
+        <label class="form-label fs-3" for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+        {{form.title}}
+        <input class="btn btn-lg btn-success mt-2 w-md-100-none" type="submit" value="Dodaj">
+    </form>
+{% endblock %}

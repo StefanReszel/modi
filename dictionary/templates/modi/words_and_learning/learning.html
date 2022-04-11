@@ -1,0 +1,60 @@
+{% extends 'modi/base.html' %}
+{% load static %}
+
+
+{% block title %}{{ dictionary }}{% endblock %}
+
+{% block top_bar_content %}
+<li class="breadcrumb-item "></li>
+<li class="breadcrumb-item mw-50 text-truncate text-light d-none-lg-none">
+    <a class="text-light" href="{{ dictionary.subject.get_absolute_url }}">{{ dictionary.subject }}</a>
+</li>
+<li class="breadcrumb-item mw-50 text-truncate text-light p-0">
+    <a class="text-light" href="{{ dictionary.get_absolute_url }}">{{ dictionary }}</a>
+</li>
+<li class="breadcrumb-item text-light text-truncate p-0">Nauka</li>
+{% endblock %}
+
+{% block side_bar_content %}
+<select class="form-select order-last order-md-0 w-md-95 ms-1 mx-md-0 mt-md-1" id="languages">
+    <option selected value="mute">Wybierz język</option>
+</select>
+{% endblock %}
+
+{% block main_content %}
+<div class="lh-1 w-lg-75">
+    <div class="h5 m-2 mb-0">Pozostało słów: <span id='counter' class="badge bg-success fs-5">{{ dictionary.words|length }}</span></div class="h1">
+
+    <label class="border border-3 border-bottom-0 border-success h6 mb-0 ms-4 mt-3 rounded-top pt-1 px-1 bg-light-success">Definicja</label>
+    <div class="input-group">
+        <span class="input-group-text fs-4 fw-bold bg-success border-success text-light">?</span>
+        <div id="definition" class="form-control form-control-lg border-success border-2 bg-light-success"></div>
+    </div>
+
+    <label class="border border-3 border-bottom-0 border-success h6 mb-0 ms-4 mt-3 rounded-top pt-1 px-1 bg-light-success">Słowo</label>
+    <div class="input-group"> 
+        <input id="word" class="form-control form-control-lg  border-success border-2" maxlength="30" type="text">
+        <input id="button" class="btn btn-success fw-bold" type="button" data-next-value="Sprawdź" value="Dalej">
+    </div>
+
+    <div id="correct-answer-box">
+        <label class="border border-3 border-bottom-0 border-success h6 mb-0 ms-4 mt-3 rounded-top pt-1 px-1 bg-light-success">Poprawna odpowiedź</label>
+        <div class="input-group">
+            <span id="sound-icon" class="input-group-text fs-4 fw-bold bg-success border-success text-light">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-volume-up" viewBox="0 0 16 16">
+                    <path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"/>
+                    <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z"/>
+                    <path d="M10.025 8a4.486 4.486 0 0 1-1.318 3.182L8 10.475A3.489 3.489 0 0 0 9.025 8c0-.966-.392-1.841-1.025-2.475l.707-.707A4.486 4.486 0 0 1 10.025 8zM7 4a.5.5 0 0 0-.812-.39L3.825 5.5H1.5A.5.5 0 0 0 1 6v4a.5.5 0 0 0 .5.5h2.325l2.363 1.89A.5.5 0 0 0 7 12V4zM4.312 6.39 6 5.04v5.92L4.312 9.61A.5.5 0 0 0 4 9.5H2v-3h2a.5.5 0 0 0 .312-.11z"/>
+                </svg>
+            </span>
+            <div id="correct-answer" class="form-control form-control-lg border-success border-2 bg-light-success"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ dictionary.words|json_script:"words" }}
+    <a id="complete" href="{% url 'dictionary:complete' dictionary.subject.slug dictionary.slug %}" hidden></a>
+    <script src="{% static 'js/learning.js' %}"></script>
+{% endblock %}

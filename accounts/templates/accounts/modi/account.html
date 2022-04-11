@@ -1,0 +1,33 @@
+{% extends 'modi/base.html' %}
+
+
+{% block title %}Konto{% endblock %}
+
+{% block top_bar_content %}
+<li class="breadcrumb-item "></li>
+<li class="breadcrumb-item mw-50 text-truncate text-light p-0">
+    Konto
+</li>
+{% endblock %}
+
+{% block side_bar_content %}
+<a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'accounts:account_email_update' user.username %}">
+    <span class="m-auto">Edytuj email</span>
+</a>
+<a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'accounts:password_change' user.username %}">
+    <span class="m-auto">Zmień hasło</span>
+</a>
+<a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'accounts:account_delete' user.username %}">
+    <span class="m-auto">Usuń konto</span>
+</a>
+{% endblock %}
+
+{% block main_content %}
+<div class="border border-2 border-success mt-1 p-1 m-md-4 p-md-4 rounded-3 w-50 w-lg-auto-none">
+    <label class="form-label text-success fs-3">Użytkownik</label>
+    <div class="form-control form-control-lg border-0 list-group-item-success">{{ user }}</div>
+
+    <label class="form-label text-success fs-4">Email</label>
+    <div class="form-control border-0 list-group-item-success">{{ user.email }}</div>
+</div>
+{% endblock %}

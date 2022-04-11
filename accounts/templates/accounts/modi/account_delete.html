@@ -1,0 +1,38 @@
+{% extends 'modi/base.html' %}
+
+
+{% block title %}Usuń konto{% endblock %}
+
+{% block top_bar_content %}
+<li class="breadcrumb-item "></li>
+<li class="breadcrumb-item mw-50 text-truncate text-light">
+    <a class="text-light" href="{% url 'accounts:account' user.username %}">Konto</a>
+</li>
+<li class="breadcrumb-item mw-50 text-truncate text-light p-0">
+    Usuń konto
+</li>
+{% endblock %}
+
+{% block side_bar_content %}
+<a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'accounts:account_email_update' user.username %}">
+    <span class="m-auto">Edytuj email</span>
+</a>
+<a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'accounts:password_change' user.username %}">
+    <span class="m-auto">Zmień hasło</span>
+</a>
+{% endblock %}
+    
+{% block main_content %}
+<div class="border border-2 border-success mt-1 p-1 m-md-4 p-md-4 rounded-3 w-50 w-lg-auto-none">
+    <div class="form-control border-0 fs-5 bg-light">
+        Czy na pewno chcesz usunąć konto ?
+        <br>
+        Wszystkie powiązane z nim dane zostaną trwale usunięte.
+    </div>
+    <form class="d-flex justify-content-around" action="." method="post">
+        <input class="btn btn-lg btn-outline-danger mt-2" type="submit" value="Tak">
+        <a class="btn btn-lg btn-outline-success mt-2" href="{% url 'accounts:account' user.username %}">Nie</a>
+        {% csrf_token %}
+    </form>
+</div>
+{% endblock %}

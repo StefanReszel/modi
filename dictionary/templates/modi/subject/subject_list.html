@@ -1,0 +1,26 @@
+{% extends 'modi/base.html' %}
+{% load static %}
+
+
+{% block top_bar_content %}
+    <li class="text-light">MODi - My Own Dictionary</li>
+    
+    <button class="toggler btn btn-outline-light text-light bg-transparent ms-auto p-1" type="button" data-bs-toggle="collapse" data-bs-target="#search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+        </svg>
+    </button>
+{% endblock %}
+
+{% block side_bar_content %}
+{% include 'modi/search_form.html' with form=search_form %}
+    <a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'dictionary:subject_create' %}">
+        <span class="m-auto">Dodaj temat</span>
+    </a>
+{% endblock  %}
+
+{% block main_content %}
+    {% for subject in subject_list %}
+        <a class="btn btn-outline-success text-start mt-1 w-100 text-truncate" href="{{ subject.get_absolute_url }}">{{ subject }}</a>
+    {% endfor %}
+{% endblock %}

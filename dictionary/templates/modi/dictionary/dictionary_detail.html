@@ -1,0 +1,39 @@
+{% extends 'modi/base.html' %}
+
+
+{% block title %}{{ dictionary }}{% endblock %}
+
+{% block top_bar_content %}
+<li class="breadcrumb-item "></li>
+<li class="breadcrumb-item mw-50 text-truncate text-light">
+    <a class="text-light" href="{{ dictionary.subject.get_absolute_url }}">{{ dictionary.subject }}</a>
+</li>
+<li class="breadcrumb-item mw-50 text-truncate text-light p-0">
+    {{ dictionary }}
+</li>
+{% endblock %}
+
+{% block side_bar_content %}
+    <a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'dictionary:word_form' dictionary.subject.slug dictionary.slug %}">
+        <span class="m-auto">Słowa i definicje</span>
+    </a>
+    <a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'dictionary:dict_update' dictionary.subject.slug dictionary.slug %}">
+        <span class="m-auto">Edytuj słownik</span>
+    </a>
+{% endblock %}
+
+{% block main_content %}
+<div class="border border-2 border-success mt-1 p-1 m-md-4 p-md-4 rounded-3 w-50 w-lg-auto-none">
+    <label class="form-label text-success fs-3">Nazwa</label>
+    <div class="form-control form-control-lg border-0 list-group-item-success">{{ dictionary }}</div>
+    {% if dictionary.description %}
+        <label class="form-label text-success fs-4">Opis</label>
+        <div class="form-control border-0 list-group-item-success">{{ dictionary.description }}</div>
+    {% endif %}
+    <div class="fs-4 text-success my-1">Ilość słów: <span class="badge list-group-item-success">{{ dictionary.words|length }}</span></div class="h1">
+    {% if dictionary.words|length > 0 %}
+        <a class="btn btn-lg btn-success mt-2 w-md-100-none" href="{% url 'dictionary:learning' dictionary.subject.slug dictionary.slug %}">Rozpocznij naukę</a>  
+    {% endif %}
+</div>
+{% endblock %}
+    

@@ -1,0 +1,31 @@
+{% extends 'modi/base.html' %}
+
+
+{% block title %}{{ dictionary }}{% endblock %}
+
+{% block top_bar_content %}
+<li class="breadcrumb-item "></li>
+<li class="breadcrumb-item mw-50 text-truncate text-light d-none-lg-none">
+    <a class="text-light" href="{{ dictionary.subject.get_absolute_url }}">{{ dictionary.subject }}</a>
+</li>
+<li class="breadcrumb-item mw-50 text-truncate text-light p-0">
+    <a class="text-light" href="{{ dictionary.get_absolute_url }}">{{ dictionary }}</a>
+</li>
+<li class="breadcrumb-item text-light text-truncate p-0">Nauka</li>
+{% endblock %}
+
+{% block side_bar_content %}
+{% endblock %}
+
+{% block main_content %}
+<div class="border border-2 border-success mt-1 p-1 m-md-4 p-md-4 rounded-3 w-50 w-lg-auto-none">
+    <div class="form-label text-success h2 text-center">Ukończono nauke!</div>
+    <div class="form-control border-0 list-group-item-success fs-5">
+    To były wszystkie słowa w tym słowniku.
+    <br>
+    <br>
+    Możesz zacząć jeszcze raz wciskając poniższy przycisk lub cofnąć się używając paska nawigacji powyżej, by wybrać inny.
+    </div>
+    <a class="btn btn-lg btn-success mt-2 w-md-100-none" href="{% url 'dictionary:learning' dictionary.subject.slug dictionary.slug %}">Jeszcze raz</a>
+</div>
+{% endblock %}

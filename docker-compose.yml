@@ -1,0 +1,44 @@
+services:
+  postgres:
+    container_name: database
+    image: postgres
+    volumes:
+      - modi-postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=modi
+      - POSTGRES_USER=modi
+      - POSTGRES_PASSWORD=modi
+
+  django:
+    container_name: modi
+    build: .
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_NAME=modi
+      - POSTGRES_USER=modi
+      - POSTGRES_PASSWORD=modi
+    depends_on:
+      - postgres
+      - celery
+    command: ["./wait-for-it.sh", "database:5432", "--", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+  celery:
+    container_name: mailer
+    build: .
+    command: celery -A accounts worker -l info
+    volumes:
+      - .:/code
+    depends_on:
+      - redis
+    restart: always
+
+  redis:
+    container_name: broker
+    image: redis
+    restart: always
+
+volumes:
+  modi-postgres-data:

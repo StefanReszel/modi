@@ -1,0 +1,8 @@
+htmlcov/
+.vscode/
+.coverage
+.coveragerc
+db.sqlite3
+dumb.rdb
+*/*.pyc
+*/*/*.pyc

@@ -1,0 +1,32 @@
+{% extends 'modi/base.html' %}
+
+
+{% block title %}Edytuj email{% endblock %}
+
+{% block top_bar_content %}
+<li class="breadcrumb-item "></li>
+<li class="breadcrumb-item mw-50 text-truncate text-light">
+    <a class="text-light" href="{% url 'accounts:account' user.username %}">Konto</a>
+</li>
+<li class="breadcrumb-item mw-50 text-truncate text-light p-0">
+    Edytuj email
+</li>
+{% endblock %}
+
+{% block side_bar_content %}
+<a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'accounts:password_change' user.username %}">
+    <span class="m-auto">Zmień hasło</span>
+</a>
+<a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'accounts:account_delete' user.username %}">
+    <span class="m-auto">Usuń konto</span>
+</a>
+{% endblock %}
+    
+{% block main_content %}
+<form class="border border-2 border-success mt-1 p-1 m-md-4 p-md-4 rounded-3 w-50 w-lg-auto-none" action="." method="post">
+    <label class="form-label fs-3" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+    {{ form.email }}
+    <input class="btn btn-lg btn-success mt-2 w-md-100-none" type="submit" value="Zatwierdź">
+    {% csrf_token %}
+</form>
+{% endblock %}

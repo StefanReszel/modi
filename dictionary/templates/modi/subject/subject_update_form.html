@@ -1,0 +1,27 @@
+{% extends 'modi/base.html' %}
+
+
+{% block title %}{{ subject }}{% endblock %}
+
+{% block top_bar_content %}
+<li class="breadcrumb-item "></li>
+<li class="breadcrumb-item mw-50 text-truncate text-light p-0">
+    <a class="text-light" href="{{ subject.get_absolute_url }}">{{ subject.title }}</a>
+</li>
+<li class="breadcrumb-item text-light text-truncate p-0">Edytuj temat</li>
+{% endblock %}
+
+{% block side_bar_content %}
+<a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'dictionary:subject_delete' subject.id %}">
+    <span class="m-auto">Usuń temat</span>
+</a>
+{% endblock  %}
+    
+{% block main_content %}
+<form class="border border-2 border-success mt-1 p-1 m-md-4 p-md-4 rounded-3 w-50 w-lg-auto-none" action="." method="post">
+    <label class="form-label fs-3" for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+    {{ form.title }}
+    <input class="btn btn-lg btn-success mt-2 w-md-100-none" type="submit" value="Zatwierdź">
+    {% csrf_token %}
+</form>
+{% endblock %}

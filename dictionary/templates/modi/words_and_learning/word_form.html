@@ -1,0 +1,82 @@
+{% extends 'modi/base.html' %}
+{% load static %}
+{% load modi_extras %}
+
+
+{% block title %}{{ dictionary }}{% endblock %}
+
+{% block top_bar_content %}
+<li class="breadcrumb-item "></li>
+<li class="breadcrumb-item mw-50 text-truncate text-light d-none-lg-none">
+    <a class="text-light" href="{{ dictionary.subject.get_absolute_url }}">{{ dictionary.subject }}</a>
+</li>
+<li class="breadcrumb-item mw-50 text-truncate text-light p-0">
+    <a class="text-light" href="{{ dictionary.get_absolute_url }}">{{ dictionary }}</a>
+</li>
+<li class="breadcrumb-item text-light text-truncate p-0">Słowa i definicje</li>
+{% endblock %}
+
+{% block side_bar_content %}
+    <form class="col col-md-1 w-md-95 p-0 p-md-0 mb-md-0 mt-md-1 me-1" action="{% url 'dictionary:confirm_changes' dictionary.id %}" method="post">
+        {% csrf_token %}
+        <button class="bottombar-button btn btn-outline-light w-100 h-md-52px-none" type="submit">Zapisz listę</button>
+    </form>
+    <form class="col col-md-1 w-md-95 p-0 p-md-0 mb-md-0 mt-md-1 me-1" action="{% url 'dictionary:refresh_list' dictionary.id %}" method="post">
+        {% csrf_token %}
+        <button class="bottombar-button btn btn-outline-light w-100 h-md-52px-none" type="submit">Odśwież listę</button>
+    </form>
+    <form class="col col-md-1 w-md-95 p-0 p-md-0 mb-md-0 mt-md-1 me-1" action="{% url 'dictionary:clear_list' dictionary.id %}" method="post">
+        {% csrf_token %}
+        <button class="bottombar-button btn btn-outline-light w-100 h-md-52px-none" type="submit">Wyczyść listę</button>
+    </form>
+    {% endblock %}
+    
+{% block main_content %}
+<div class="h4 m-2">Ilość słów: <span id="counter" class="badge bg-success">{{ words|length }}</span></div class="h1">
+<div class="container-fluid">
+    <div class="row align-items-center flex-nowrap">
+        <form class="col row g-0 ms-1" id="new_word" action="{% url 'dictionary:word_form' dictionary.subject.slug dictionary.slug %}" method="post">
+            {% csrf_token %}
+            <div class="col-md-4 form-floating p-0">
+                {{form.word}}
+                <label class="" for="{{ form.word.id_for_label }}">{{ form.word.label }}</label>
+            </div>
+            <div class="col-md-8 form-floating p-0">
+                {{ form.definition }}
+                <label for="{{ form.definition.id_for_label }}">{{ form.definition.label }}</label>
+            </div>
+        </form>
+        <input class="btn btn-success w-69px mx-1" form="new_word" id="add_word" type="submit" value="Dodaj">
+    </div>
+    <div class="ms-1" id="words">
+        {% for definition, word in words %}
+        <div class="row align-items-center flex-nowrap mt-1">
+            <div class="col row g-0">
+                <div class="col-md-4 form-floating px-1 py-2 d-flex border border-success rounded-3
+                {% if definition not in dictionary.words.keys or word != dictionary.words|get_value:definition %}
+                bg-light-warning{% else %}bg-light-success{% endif %}">
+                    <span class="my-auto">{{ word }}</span>
+                </div>
+                <div class="col-md-8 form-floating px-1 py-2 d-flex border border-top-0 border-success rounded-3
+                {% if definition not in dictionary.words.keys or word != dictionary.words|get_value:definition %}
+                bg-light-warning{% else %}bg-light-success{% endif %} border-left-md-0">
+                    <span class="my-auto">{{ definition }}</span>
+                </div>
+            </div>
+            <a class="delete btn btn-danger w-69px mx-1" href="#" data-definition="{{ definition }}">Usuń</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+<input type="hidden" name="delete_url" value="{% url 'dictionary:word_delete' dictionary.id %}">
+<script>
+    let deleteUrl = "{% url 'dictionary:word_delete' dictionary.id %}"
+</script>
+<script src="{% static 'js/word_form.js' %}"></script>
+{% endblock %}
+
+    

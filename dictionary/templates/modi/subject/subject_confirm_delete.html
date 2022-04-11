@@ -1,0 +1,23 @@
+{% extends 'modi/base.html' %}
+
+
+{% block title %}{{ subject }}{% endblock %}
+
+{% block top_bar_content %}
+<li class="breadcrumb-item "></li>
+<li class="breadcrumb-item mw-50 text-truncate text-light d-none-lg-none">
+    <a class="text-light" href="{{ subject.get_absolute_url }}">{{ subject }}</a>
+</li>
+<li class="breadcrumb-item mw-50 text-truncate text-light p-0">
+    <a class="text-light" href="{% url 'dictionary:subject_update' subject.slug %}">Edytuj temat</a>
+</li>
+<li class="breadcrumb-item text-light text-truncate p-0">Usuń temat</li>
+{% endblock %}
+
+{% block side_bar_content %}
+{% endblock  %}
+    
+{% block main_content %}
+    {% url 'dictionary:subject_update' subject.slug as url %}
+    {% include 'modi/delete_form.html' with object=subject action='subject_delete' redirect=url %}
+{% endblock %}

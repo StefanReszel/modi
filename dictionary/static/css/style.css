@@ -1,0 +1,130 @@
+@media (min-width: 768px){
+    .vh-md-100{
+        height: 100vh!important;
+    }
+    
+    .overflow-y-md-scroll{
+        overflow-y: auto;
+        height: 1px;
+    }
+
+    .w-md-95{
+        width: 95% !important;
+    }
+    .collapse{
+        display: block !important;
+    }
+    .toggler{
+        display: none;
+    }
+    .border-left-md-0{
+        border-left: 0 !important;
+        border-top: 1px solid #198754 !important;
+    }
+}
+@media (max-width: 767.98px){
+    .fixed-bottom-md-none{
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1030;
+    }
+    
+    .bottombar-button{
+        padding: 1px !important;
+    }
+    
+    .pb-md-64px-none{
+        padding-bottom: 64px !important;
+    }
+
+    .form-select{
+        width: auto !important;
+    }
+
+    .h-md-52px-none{
+        height: 52px;
+    }
+}
+
+@media (max-width: 991.98px){
+    .w-lg-auto-none{
+        width: auto !important;
+    }
+
+    .w-md-100-none{
+        width: 100% !important;
+    }
+
+    .d-none-lg-none{
+        display: none !important;
+    }
+}
+
+@media (min-width: 992px){
+    .w-lg-75{
+        width: 75%;
+    }
+}
+
+.topbar{
+    height: 60px;
+}
+
+.list-group{
+    margin: 0 -4px;
+}
+
+.form-control:focus{
+    box-shadow: 0 0 0 0.25rem rgb(248 249 250 / 25%) !important;
+}
+
+.breadcrumb-item::before{
+    color:rgba(var(--bs-light-rgb),var(--bs-text-opacity))!important;
+    padding: 0 0.25rem !important;
+}
+
+.mw-50{
+    max-width: 50%;
+}
+
+.form-control-lg{
+    padding: 0.5rem;
+}
+
+.w-69px{
+    width: 69px !important;
+}
+
+.bg-light-success{
+    background-color: #d1e7dd;
+}
+
+.bg-light-warning{
+    background-color: #fff3cd;
+}
+
+.form-select:focus{
+    box-shadow: 0 0 0 0.25rem rgb(248 249 250 / 25%) !important;
+}
+
+.mb-n64px{
+    margin-bottom: -64px !important;
+}
+
+#languages{
+    display: none;
+}
+    
+#word{
+    box-shadow: none !important;
+}
+    
+#sound-icon:hover{
+    cursor: pointer;
+}
+
+#button{
+    width: 87.7px !important;
+}

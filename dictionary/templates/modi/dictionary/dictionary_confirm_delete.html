@@ -1,0 +1,26 @@
+{% extends 'modi/base.html' %}
+
+
+{% block title %}{{ dictionary }}{% endblock %}
+
+{% block top_bar_content %}
+<li class="breadcrumb-item "></li>
+<li class="breadcrumb-item mw-50 text-truncate text-light d-none-lg-none">
+    <a class="text-light" href="{{ subject.get_absolute_url }}">{{ subject }}</a>
+</li>
+<li class="breadcrumb-item mw-50 text-truncate text-light p-0 d-none-lg-none">
+    <a class="text-light" href="{{ dictionary.get_absolute_url }}">{{ dictionary }}</a>
+</li>
+<li class="breadcrumb-item mw-50 text-truncate text-light p-0">
+    <a class="text-light" href="{% url 'dictionary:dict_update' subject.slug dictionary.slug %}">Edytuj słownik</a>
+</li>
+<li class="breadcrumb-item text-light text-truncate p-0">Usuń słownik</li>
+{% endblock %}
+
+{% block side_bar_content %}
+{% endblock  %}
+    
+{% block main_content %}
+    {% url 'dictionary:dict_update' subject.slug dictionary.slug as url %}
+    {% include 'modi/delete_form.html' with object=dictionary action='dict_delete' redirect=url %}
+{% endblock %}

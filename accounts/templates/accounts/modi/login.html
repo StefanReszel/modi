@@ -1,0 +1,32 @@
+{% extends 'modi/base.html' %}
+
+
+{% block title %}Zaloguj się{% endblock %}
+
+{% block top_bar_content %}
+<li class="breadcrumb-item "></li>
+<li class="breadcrumb-item text-truncate text-light p-0">
+    MODi - My Own Dictionary
+</li>
+{% endblock %}
+
+{% block side_bar_content %}
+<a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'accounts:sign_up' %}">
+    <span class="m-auto">Zarejestruj się</span>
+</a>
+<a class="bottombar-button col col-md-1 btn btn-outline-light mx-md-0 mt-md-1 w-md-95 me-1 d-flex h-md-52px-none" href="{% url 'accounts:password_reset' %}">
+    <span class="m-auto">Zapomniałem hasła</span>
+</a>
+{% endblock %}
+
+{% block main_content %}
+    <form class="border border-2 border-success mt-1 p-1 m-md-4 p-md-4 rounded-3 w-50 w-lg-auto-none" action="." method="post">
+        {% csrf_token %}
+        <label class="form-label fs-3" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+        {{ form.username }}
+        <label class="form-label fs-3" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+        {{ form.password }}
+        <input class="btn btn-lg btn-success mt-2 w-md-100-none" type="submit" value="Zaloguj się">
+        <input type="hidden" name="next" value="{% url 'dictionary:subject_list' %}">
+    </form>
+{% endblock %}
