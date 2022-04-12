@@ -1,17 +1,16 @@
 from django.views.generic import CreateView, DeleteView, UpdateView, TemplateView
-from django.contrib.auth.views import LoginView, LogoutView,\
-    PasswordChangeView, PasswordResetView, PasswordResetConfirmView
+from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import mixins
 
 from .models import User
-from .forms import ModiAuthenticationForm, ModiUserCreationForm, ModiUserEmailUpdateForm,\
-    ModiPasswordChangeForm, ModiPasswordResetForm, ModiSetPasswordForm
+from .forms import AuthenticationForm, UserCreationForm, UserEmailUpdateForm,\
+    PasswordChangeForm, PasswordResetForm, SetPasswordForm
 
 
-class CommonLoginRequiredMixin(LoginRequiredMixin):
-    login_url = '/accounts/login/'
+class LoginRequiredMixin(mixins.LoginRequiredMixin):
+    login_url = reverse_lazy('accounts:login')
     redirect_field_name = None
 
 
@@ -25,7 +24,7 @@ class UpdateSuccessUrlMixin:
         return reverse_lazy('accounts:account', args=[self.request.user.username])
 
 
-class RaisingFormErrorsMixin:
+class ErrorMessageMixin:
     def form_invalid(self, form):
         for field_errors in form.errors.values():
             for error in field_errors:
@@ -33,7 +32,7 @@ class RaisingFormErrorsMixin:
         return super().form_invalid(form)
 
 
-class SetSuccessMessagesMixin:
+class SuccessMessageMixin:
     info_message = False
 
     def form_valid(self, form):
@@ -50,12 +49,12 @@ class SetSuccessMessagesMixin:
         return "Teraz możesz się zalogować."
 
 
-class AccountView(CommonLoginRequiredMixin, TemplateView):
+class AccountView(LoginRequiredMixin, TemplateView):
     template_name = 'accounts/modi/account.html'
 
 
-class ModiUserCreateView(RaisingFormErrorsMixin, SetSuccessMessagesMixin, CreateView):
-    form_class = ModiUserCreationForm
+class UserCreateView(ErrorMessageMixin, SuccessMessageMixin, CreateView):
+    form_class = UserCreationForm
     template_name = 'accounts/modi/sign_up.html'
     success_url = reverse_lazy('dictionary:subject_list')
     info_message = True
@@ -64,15 +63,15 @@ class ModiUserCreateView(RaisingFormErrorsMixin, SetSuccessMessagesMixin, Create
         return "Pomyślnie zarejestrowano nowego użytkownika"
 
 
-class ModiLoginView(RaisingFormErrorsMixin, SetSuccessMessagesMixin, LoginView):
+class LoginView(ErrorMessageMixin, SuccessMessageMixin, auth_views.LoginView):
     template_name = 'accounts/modi/login.html'
-    authentication_form = ModiAuthenticationForm
+    authentication_form = AuthenticationForm
 
     def get_success_message(self):
         return f"Witaj {self.request.user}!"
 
 
-class ModiLogoutView(LogoutView):
+class LogoutView(auth_views.LogoutView):
     next_page = reverse_lazy("accounts:login")
 
     def get_next_page(self):
@@ -80,7 +79,7 @@ class ModiLogoutView(LogoutView):
         return super().get_next_page()
 
 
-class ModiUserDeleteView(CommonLoginRequiredMixin, GetUserMixin, DeleteView):
+class UserDeleteView(LoginRequiredMixin, GetUserMixin, DeleteView):
     model = User
     template_name = 'accounts/modi/account_delete.html'
     success_url = reverse_lazy('accounts:login')
@@ -92,25 +91,25 @@ class ModiUserDeleteView(CommonLoginRequiredMixin, GetUserMixin, DeleteView):
         return response
 
 
-class ModiUserEmailUpdateView(CommonLoginRequiredMixin, SetSuccessMessagesMixin, RaisingFormErrorsMixin,
-                              UpdateSuccessUrlMixin, GetUserMixin, UpdateView):
+class UserEmailUpdateView(LoginRequiredMixin, SuccessMessageMixin, ErrorMessageMixin,
+                          UpdateSuccessUrlMixin, GetUserMixin, UpdateView):
     model = User
-    form_class = ModiUserEmailUpdateForm
+    form_class = UserEmailUpdateForm
     template_name = 'accounts/modi/user_email_update.html'
 
     def get_success_message(self):
         return "Pomyślnie zmieniono adres email."
 
 
-class ModiPasswordChangeView(CommonLoginRequiredMixin, SetSuccessMessagesMixin, RaisingFormErrorsMixin,
-                             UpdateSuccessUrlMixin, PasswordChangeView):
-    form_class = ModiPasswordChangeForm
+class PasswordChangeView(LoginRequiredMixin, SuccessMessageMixin, ErrorMessageMixin,
+                         UpdateSuccessUrlMixin, auth_views.PasswordChangeView):
+    form_class = PasswordChangeForm
     template_name = 'accounts/modi/password_change_form.html'
     success_url = reverse_lazy('accounts:account')
 
 
-class ModiPasswordResetView(SetSuccessMessagesMixin, PasswordResetView):
-    form_class = ModiPasswordResetForm
+class PasswordResetView(SuccessMessageMixin, auth_views.PasswordResetView):
+    form_class = PasswordResetForm
     template_name = 'accounts/modi/password_reset_form.html'
     from_email = 'MODi - My Own Dictionary'
     subject_template_name = 'accounts/modi/email/password_reset_subject.txt'
@@ -121,8 +120,9 @@ class ModiPasswordResetView(SetSuccessMessagesMixin, PasswordResetView):
         return 'Sprawdź skrzynkę email.'
 
 
-class ModiPasswordResetConfirmView(SetSuccessMessagesMixin, RaisingFormErrorsMixin, PasswordResetConfirmView):
-    form_class = ModiSetPasswordForm
+class PasswordResetConfirmView(SuccessMessageMixin, ErrorMessageMixin,
+                               auth_views.PasswordResetConfirmView):
+    form_class = SetPasswordForm
     template_name = 'accounts/modi/password_reset_confirm.html'
     success_url = reverse_lazy('accounts:login')
     info_message = True

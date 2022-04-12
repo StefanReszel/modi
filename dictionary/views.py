@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.utils.text import slugify
 from unidecode import unidecode
 
-from accounts.views import CommonLoginRequiredMixin
+from accounts.views import LoginRequiredMixin
 from .models import Dictionary, Subject
 from .forms import SearchForm, SubjectForm, DictionaryForm, WordForm
 from .words import Words, DuplicateError
@@ -56,7 +56,7 @@ class GetDictionaryObjectMixin(GetSubjectObjectMixin):
                                  subject=self.get_subject_object())
 
 
-class CustomProcessFormMixin:
+class CustomProcessFormMixin(GetSubjectObjectMixin):
     def form_valid(self, form):
         class_name = self.__class__.__name__
 
@@ -73,7 +73,7 @@ class CustomProcessFormMixin:
         except IntegrityError:
             if "Update" in class_name:
                 # reversing changes in self.object, without this,
-                # breadcrumbs will render improperly
+                # breadcrumbs (in HTML) will render improperly
                 self.object = self.get_object()
             messages.error(self.request, self.get_error_message())
             messages.info(self.request, self.get_info_message())
@@ -108,7 +108,7 @@ class SearchMixin:
         if self.query is not None:
             # when there was nothing writed in search form, returns all
             if self.query == "":
-                messages.info(self.request, self.get_empty_query_message())
+                messages.info(self.request, self.get_empty_form_field_message())
                 return queryset
             self.extra_context = {'value': self.query}
             found = queryset.filter(
@@ -124,7 +124,7 @@ class SearchMixin:
 
     def get_empty_queryset_message(self): return "EMPTY QUERYSET"
 
-    def get_empty_query_message(self): return "EMPTY QUERY"
+    def get_empty_form_field_message(self): return "EMPTY FORM FIELD"
 
 
 class CustomDeletionMixin:
@@ -136,7 +136,7 @@ class CustomDeletionMixin:
     def get_success_message(self): 'SUCCESS'
 
 
-class SubjectListView(CommonLoginRequiredMixin, SubjectModelMixin, SearchMixin, ListView):
+class SubjectListView(LoginRequiredMixin, SubjectModelMixin, SearchMixin, ListView):
     def get_queryset(self):
         queryset = self.request.user.subjects.all()
         return self.return_found_or_all(queryset)
@@ -152,11 +152,11 @@ class SubjectListView(CommonLoginRequiredMixin, SubjectModelMixin, SearchMixin, 
     def get_empty_queryset_message(self):
         return 'Nie dodano jeszcze tematów.'
 
-    def get_empty_query_message(self):
+    def get_empty_form_field_message(self):
         return 'Wpisz nazwę lub jej część, by znaleźć temat.'
 
 
-class SubjectCreateView(CommonLoginRequiredMixin, SubjectModelMixin, SubjectModelFormMixin, TemplateCreateSufixMixin,
+class SubjectCreateView(LoginRequiredMixin, SubjectModelMixin, SubjectModelFormMixin, TemplateCreateSufixMixin,
                         CustomProcessFormMixin, CreateView):
     def get_success_message(self):
         return "Dodawanie tematu zakończyło się pomyślnie."
@@ -165,8 +165,8 @@ class SubjectCreateView(CommonLoginRequiredMixin, SubjectModelMixin, SubjectMode
         return "Dodawanie tematu się nie powiodło."
 
 
-class SubjectUpdateView(CommonLoginRequiredMixin, SubjectModelFormMixin, TemplateUpdateSufixMixin,
-                        GetSubjectObjectMixin, CustomProcessFormMixin, UpdateView):
+class SubjectUpdateView(LoginRequiredMixin, SubjectModelFormMixin, TemplateUpdateSufixMixin,
+                        CustomProcessFormMixin, UpdateView):
     def get_object(self):
         return self.get_subject_object()
 
@@ -177,14 +177,14 @@ class SubjectUpdateView(CommonLoginRequiredMixin, SubjectModelFormMixin, Templat
         return "Edycja tematu się nie powiodła."
 
 
-class SubjectDeleteView(CommonLoginRequiredMixin, SubjectModelMixin, CustomDeletionMixin, DeleteView):
+class SubjectDeleteView(LoginRequiredMixin, SubjectModelMixin, CustomDeletionMixin, DeleteView):
     success_url = reverse_lazy('dictionary:subject_list')
 
     def get_success_message(self):
         return 'Temat usunięto pomyślnie.'
 
 
-class DictionaryListView(CommonLoginRequiredMixin, SearchMixin, GetSubjectObjectMixin, ListView):
+class DictionaryListView(LoginRequiredMixin, SearchMixin, GetSubjectObjectMixin, ListView):
 
     def get_queryset(self):
         self.subject = self.get_subject_object()
@@ -203,12 +203,12 @@ class DictionaryListView(CommonLoginRequiredMixin, SearchMixin, GetSubjectObject
     def get_empty_queryset_message(self):
         return 'Nie dodano jeszcze słowników.'
 
-    def get_empty_query_message(self):
+    def get_empty_form_field_message(self):
         return 'Wpisz nazwę lub jej część, by znaleźć słownik.'
 
 
-class DictionaryCreateView(CommonLoginRequiredMixin, DictionaryModelMixin, DictionaryModelFormMixin,
-                           GetSubjectObjectMixin, TemplateCreateSufixMixin, CustomProcessFormMixin, CreateView):
+class DictionaryCreateView(LoginRequiredMixin, DictionaryModelMixin, DictionaryModelFormMixin,
+                           TemplateCreateSufixMixin, CustomProcessFormMixin, CreateView):
     def get_success_url(self):
         add_word_message = 'Dodaj teraz jakieś słowa i definicje.'
         messages.info(self.request, add_word_message)
@@ -225,11 +225,11 @@ class DictionaryCreateView(CommonLoginRequiredMixin, DictionaryModelMixin, Dicti
         return "Dodawanie słownika się nie powiodło."
 
 
-class DictionaryDetailView(CommonLoginRequiredMixin, GetDictionaryObjectMixin, DetailView):
+class DictionaryDetailView(LoginRequiredMixin, GetDictionaryObjectMixin, DetailView):
     pass
 
 
-class DictionaryUpdateView(CommonLoginRequiredMixin, DictionaryModelFormMixin, GetDictionaryObjectMixin,
+class DictionaryUpdateView(LoginRequiredMixin, DictionaryModelFormMixin, GetDictionaryObjectMixin,
                            TemplateUpdateSufixMixin, CustomProcessFormMixin, UpdateView):
     def get_success_message(self):
         return "Edycja słownika zakończyła się pomyślnie."
@@ -238,7 +238,7 @@ class DictionaryUpdateView(CommonLoginRequiredMixin, DictionaryModelFormMixin, G
         return "Edycja słownika się nie powiodła."
 
 
-class DictionaryDeleteView(CommonLoginRequiredMixin, DictionaryModelMixin, CustomDeletionMixin, DeleteView):
+class DictionaryDeleteView(LoginRequiredMixin, DictionaryModelMixin, CustomDeletionMixin, DeleteView):
     def get_success_url(self):
         return reverse_lazy('dictionary:dict_list', args=[self.object.subject.slug])
 
@@ -249,7 +249,7 @@ class DictionaryDeleteView(CommonLoginRequiredMixin, DictionaryModelMixin, Custo
         return 'Słownik usunięto pomyślnie.'
 
 
-class WordFormView(CommonLoginRequiredMixin, GetDictionaryObjectMixin, FormView):
+class WordFormView(LoginRequiredMixin, GetDictionaryObjectMixin, FormView):
     form_class = WordForm
     template_name = 'dictionary/word_form.html'
 
@@ -276,7 +276,7 @@ class WordFormView(CommonLoginRequiredMixin, GetDictionaryObjectMixin, FormView)
             return super().form_invalid(form)
 
 
-class WordsManagementView(CommonLoginRequiredMixin, View):
+class WordsManagementView(LoginRequiredMixin, View):
     """
     This view, in regard to `self.action`, performs appropriate method of `Words` instance.
 
@@ -302,6 +302,6 @@ class WordsManagementView(CommonLoginRequiredMixin, View):
         return redirect('dictionary:word_form', dictionary.subject.slug, dictionary.slug)
 
 
-class LearningView(CommonLoginRequiredMixin, GetDictionaryObjectMixin, TemplateView):
+class LearningView(LoginRequiredMixin, GetDictionaryObjectMixin, TemplateView):
     def get_context_data(self, **kwargs):
         return super().get_context_data(dictionary=self.get_object())

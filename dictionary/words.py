@@ -1,5 +1,6 @@
 from typing import List
 
+
 class Words:
     def __init__(self, request, dictionary):
         self.session = request.session

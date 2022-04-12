@@ -31,25 +31,26 @@ class PermissionsAPITestCase(APITestCase):
 
     def test_is_owner_permission(self):
         # one user
-        self.client.login( username='TestUser', password='test1234')
-        
+        self.client.login(username='TestUser', password='test1234')
+
         # Subject
         response = self.client.get(reverse('subject-detail', args=[self.user_subject.id]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = self.client.get(reverse('subject-detail', args=[self.another_user_subject.id]))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        
+
         # Dictionary
         response = self.client.get(reverse('dictionary-detail', args=[self.user_subject.id, self.user_dictionary.id]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        response = self.client.get(reverse('dictionary-detail', args=[self.another_user_subject.id, self.another_user_dictionary.id]))
+        response = self.client.get(reverse('dictionary-detail',
+                                   args=[self.another_user_subject.id, self.another_user_dictionary.id]))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # another user
-        self.client.login( username='AnotherTestUser', password='test1234')
-        
+        self.client.login(username='AnotherTestUser', password='test1234')
+
         # Subject
         response = self.client.get(reverse('subject-detail', args=[self.another_user_subject.id]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -58,7 +59,8 @@ class PermissionsAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # Dictionary
-        response = self.client.get(reverse('dictionary-detail', args=[self.another_user_subject.id, self.another_user_dictionary.id]))
+        response = self.client.get(reverse('dictionary-detail',
+                                   args=[self.another_user_subject.id, self.another_user_dictionary.id]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = self.client.get(reverse('dictionary-detail', args=[self.user_subject.id, self.user_dictionary.id]))
@@ -122,7 +124,44 @@ class ViewsAPITestCase(APITestCase):
         Dictionary.objects.create(title="inne słówka", subject=Subject.objects.get(id=2))
 
     def setUp(self):
-        self.client.login( username='TestUser', password='test1234')
+        self.client.login(username='TestUser', password='test1234')
+
+    def test_response_status(self):
+        # existed `Subject`
+        response = self.client.get(reverse('subject-detail', args=[1]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # nonexisted `Subject`
+        response = self.client.get(reverse('subject-detail', args=[10]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # existed `Subject`
+        response = self.client.get(reverse('dictionary-list', args=[1]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # nonexisted `Subject`
+        response = self.client.get(reverse('dictionary-list', args=[10]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # existed `Subject` and `Dictionary`
+        response = self.client.get(reverse('dictionary-detail',
+                                   args=[1, 1]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # nonexisted `Subject` and existed `Dictionary`
+        response = self.client.get(reverse('dictionary-detail',
+                                   args=[10, 1]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # existed `Subject` and nonexisted `Dictionary`
+        response = self.client.get(reverse('dictionary-detail',
+                                   args=[1, 10]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # nonexisted `Subject` and nonexisted `Dictionary`
+        response = self.client.get(reverse('dictionary-detail',
+                                   args=[10, 10]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_search_mixin(self):
         """
@@ -156,7 +195,7 @@ class ViewsAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 3)
 
-        # Test of `Dictionary``
+        # Test of `Dictionary`
         # a case with no data
         response = self.client.get(reverse('dictionary-list', args=[1]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -245,7 +284,6 @@ class ViewsAPITestCase(APITestCase):
         response = self.client.get(reverse('dictionary-edit-words', args=[1, 1]))
         self.assertEqual(len(response.data), 3)
 
-
     def test_delete_word(self):
         response = self.client.delete(reverse('dictionary-edit-words', args=[1, 1]),
                                       data={"definition": "pies"})
@@ -277,7 +315,7 @@ class ViewsAPITestCase(APITestCase):
         self.assertEqual(len(response.data), 2)
 
         self.client.delete(reverse('dictionary-edit-words', args=[1, 1]),
-                                   data={"definition": "pies"})
+                           data={"definition": "pies"})
         response = self.client.get(reverse('dictionary-edit-words', args=[1, 1]))
         self.assertEqual(len(response.data), 1)
 
@@ -288,7 +326,7 @@ class ViewsAPITestCase(APITestCase):
         self.assertEqual(len(response.data), 2)
 
         self.client.put(reverse('dictionary-edit-words', args=[1, 1]),
-                                data={"word": "cat", "definition": "kot"})
+                        data={"word": "cat", "definition": "kot"})
         response = self.client.get(reverse('dictionary-edit-words', args=[1, 1]))
         self.assertEqual(len(response.data), 3)
 
@@ -303,7 +341,7 @@ class ViewsAPITestCase(APITestCase):
         self.assertEqual(len(dictionary.words), 2)
 
         self.client.put(reverse('dictionary-edit-words', args=[1, 1]),
-                                data={"word": "cat", "definition": "kot"})
+                        data={"word": "cat", "definition": "kot"})
 
         dictionary = Dictionary.objects.get(id=1)
         self.assertEqual(len(dictionary.words), 2)
@@ -314,10 +352,10 @@ class ViewsAPITestCase(APITestCase):
         self.assertEqual(len(dictionary.words), 3)
 
         self.client.delete(reverse('dictionary-edit-words', args=[1, 1]),
-                                data={"definition": "kot"})
+                           data={"definition": "kot"})
 
         self.client.delete(reverse('dictionary-edit-words', args=[1, 1]),
-                                data={"definition": "pies"})
+                           data={"definition": "pies"})
 
         dictionary = Dictionary.objects.get(id=1)
         self.assertEqual(len(dictionary.words), 3)

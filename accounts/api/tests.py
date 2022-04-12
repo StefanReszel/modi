@@ -87,7 +87,7 @@ class UserDetailViewTestCase(APITestCase):
 
     def setUp(self):
         self.client.login(username='TestUser', password='test1234')
-    
+
     def test_get_method(self):
         # test getting data of logged user
         response = self.client.get(reverse('user-detail', args=[self.user.id]))
@@ -103,23 +103,23 @@ class UserDetailViewTestCase(APITestCase):
                                          'old_password': 'test1234',
                                          'new_password': 'new-password'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-       
+
         self.user = User.objects.get(id=self.user.id)
         self.assertEqual(self.user.email, 'new-email@test.com')
         self.assertTrue(self.user.check_password('new-password'))
 
         response = self.client.patch(reverse('user-detail', args=[self.user.id]),
-                                   data={'email': 'test@email.com'})
+                                     data={'email': 'test@email.com'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = self.client.patch(reverse('user-detail', args=[self.user.id]),
-                                   data={'old_password': 'new-password',
-                                         'new_password': 'test1234'})
+                                     data={'old_password': 'new-password',
+                                           'new_password': 'test1234'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = self.client.patch(reverse('user-detail', args=[self.user.id]),
-                                   data={'old_password': 'new-password',
-                                         'new_password': 'test1234'})
+                                     data={'old_password': 'new-password',
+                                           'new_password': 'test1234'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -194,13 +194,16 @@ class PasswordConfirmViewTestCase(APITestCase):
     def test_post(self):
         PasswordConfirmView.token_generator = Mock()
 
-        response = self.client.post(reverse('password-confirm'), data={'new_password': 'TopSecret', 'uid': self.uid, 'token': 'abcde12345'})
+        response = self.client.post(reverse('password-confirm'), data={
+            'new_password': 'TopSecret', 'uid': self.uid, 'token': 'abcde12345'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # case with invalid uid
-        response = self.client.post(reverse('password-confirm'), data={'new_password': 'TopSecret', 'uid': 'invalid', 'token': 'abcde12345'})
+        response = self.client.post(reverse('password-confirm'), data={
+            'new_password': 'TopSecret', 'uid': 'invalid', 'token': 'abcde12345'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # case with invalid password
-        response = self.client.post(reverse('password-confirm'), data={'new_password': 'top', 'uid': self.uid, 'token': 'abcde12345'})
+        response = self.client.post(reverse('password-confirm'), data={
+            'new_password': 'top', 'uid': self.uid, 'token': 'abcde12345'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

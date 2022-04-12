@@ -150,11 +150,12 @@ MESSAGE_TAGS = {
     }
 
 
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
 EMAIL_HOST_USER = 'MODi.learning.app'
-EMAIL_HOST_PASSWORD = 'modi1234'
+EMAIL_HOST_PASSWORD = 'MODI1234'
 
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

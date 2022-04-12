@@ -3,7 +3,7 @@ from django.urls import reverse
 
 from accounts.tasks import async_send_email
 from accounts.models import User
-from accounts.forms import ModiPasswordResetForm
+from accounts.forms import PasswordResetForm
 
 
 class ViewsTestCase(TestCase):
@@ -34,7 +34,6 @@ class ViewsTestCase(TestCase):
                                                                      "next": reverse('dictionary:subject_list')})
         self.assertEqual(response.status_code, 200)
 
-
     def test_raising_form_errors(self):
         """
         Test of `accounts.views.RaisingFormErrorsMixin`.
@@ -42,7 +41,7 @@ class ViewsTestCase(TestCase):
         # incorrect data
         data = {
             "username": "AnotherUser",
-            "email": "it will be invalid", 
+            "email": "it will be invalid",
             "password1": "test1234",
             "password2": "1234test",
         }
@@ -66,9 +65,9 @@ class FormsTestCase(TestCase):
 
     def test_modi_password_reset_form(self):
         """
-        Test of `accounts.forms.ModiPasswordResetForm.get_users`.
+        Test of `accounts.forms.PasswordResetForm.get_users`.
         """
-        form = ModiPasswordResetForm()
+        form = PasswordResetForm()
 
         users = form.get_users('test@email.com')
         self.assertIn(self.user, users)
@@ -103,5 +102,5 @@ class TasksTestCase(TestCase):
             }
 
         result = async_send_email(subject_template_name, email_template_name, context, from_email, to_email=user_email)
-        
+
         self.assertEqual(result, 1)

@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, serializers, status
+from rest_framework import viewsets, permissions, serializers, status, exceptions
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
@@ -29,7 +29,7 @@ class SearchMixin:
         if query:
             found = queryset.filter(
                 slug__icontains=slugify(unidecode(query)))
-            # if nothing found, returns all
+            # if found nothing, returns all
             if not found:
                 return queryset
             return found
@@ -48,7 +48,7 @@ class SubjectViewSet(IsAuthenticatedOwnerMixin, SearchMixin, viewsets.ModelViewS
             serializer.save(owner=self.request.user)
         except IntegrityError:
             raise serializers.ValidationError(["Dodawanie tematu się nie powiodło.",
-                "Temat o takiej lub podobnej nazwie najprawdopodobniej już istnieje."])
+                  "Temat o takiej lub podobnej nazwie najprawdopodobniej już istnieje."])
 
 
 class DictionaryViewSet(IsAuthenticatedOwnerMixin, SearchMixin, viewsets.ModelViewSet):
@@ -56,10 +56,15 @@ class DictionaryViewSet(IsAuthenticatedOwnerMixin, SearchMixin, viewsets.ModelVi
 
     def dispatch(self, request, *args, **kwargs):
         subject_id = self.kwargs.get('subject_pk')
-        self.subject = Subject.objects.get(id=subject_id)
+        try:
+            self.subject = Subject.objects.get(id=subject_id)
+        except Subject.DoesNotExist:
+            self.subject = None
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
+        if self.subject is None:
+            raise exceptions.NotFound({"detail": "Nie znaleziono."})
         queryset = self.subject.dicts.all()
         return self.return_found_or_all(queryset)
 
@@ -68,8 +73,7 @@ class DictionaryViewSet(IsAuthenticatedOwnerMixin, SearchMixin, viewsets.ModelVi
             serializer.save(subject=self.subject)
         except IntegrityError:
             raise serializers.ValidationError(["Dodawanie słownika się nie powiodło.",
-                "Słownik o takiej lub podobnej nazwie najprawdopodobniej już istnieje."])
-
+                  "Słownik o takiej lub podobnej nazwie najprawdopodobniej już istnieje."])
 
     @action(detail=True)
     def words(self, request, *args, **kwargs):
@@ -127,4 +131,4 @@ class DictionaryViewSet(IsAuthenticatedOwnerMixin, SearchMixin, viewsets.ModelVi
         """
         words = Words(request, self.get_object())
         words.refresh_list()
-        return Response(data=dict(words.get_words()))  
+        return Response(data=dict(words.get_words()))

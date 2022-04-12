@@ -1,6 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UsernameField,\
-    PasswordChangeForm, PasswordResetForm, SetPasswordForm
+from django.contrib.auth import forms as auth_forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import validate_email
@@ -9,7 +8,7 @@ from .models import User
 from .tasks import async_send_email
 
 
-class ModiUserCreationForm(UserCreationForm):
+class UserCreationForm(auth_forms.UserCreationForm):
     password1 = forms.CharField(
         label=_("Password"),
         strip=False,
@@ -31,7 +30,7 @@ class ModiUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ("username", "email")
-        field_classes = {'username': UsernameField}
+        field_classes = {'username': auth_forms.UsernameField}
         widgets = {
             'username': forms.TextInput(attrs={
                 'autofocus': True,
@@ -44,8 +43,8 @@ class ModiUserCreationForm(UserCreationForm):
         }
 
 
-class ModiAuthenticationForm(AuthenticationForm):
-    username = UsernameField(
+class AuthenticationForm(auth_forms.AuthenticationForm):
+    username = auth_forms.UsernameField(
         label='Użytkownik lub email',
         widget=forms.TextInput(attrs={
             'autofocus': True,
@@ -62,7 +61,7 @@ class ModiAuthenticationForm(AuthenticationForm):
         )
 
 
-class ModiUserEmailUpdateForm(forms.ModelForm):
+class UserEmailUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['email']
@@ -74,7 +73,7 @@ class ModiUserEmailUpdateForm(forms.ModelForm):
             }
 
 
-class ModiPasswordChangeForm(PasswordChangeForm):
+class PasswordChangeForm(auth_forms.PasswordChangeForm):
     old_password = forms.CharField(
         label=_("Old password"),
         strip=False,
@@ -102,7 +101,7 @@ class ModiPasswordChangeForm(PasswordChangeForm):
         )
 
 
-class ModiPasswordResetForm(PasswordResetForm):
+class PasswordResetForm(auth_forms.PasswordResetForm):
     email = forms.CharField(
         label="Użytkownik lub email",
         max_length=254,
@@ -135,7 +134,7 @@ class ModiPasswordResetForm(PasswordResetForm):
             return ()
 
 
-class ModiSetPasswordForm(SetPasswordForm):
+class SetPasswordForm(auth_forms.SetPasswordForm):
     new_password1 = forms.CharField(
         label=_("New password"),
         strip=False,
