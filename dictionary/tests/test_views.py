@@ -9,9 +9,9 @@ from dictionary.models import Subject, Dictionary
 
 class SubjectViewsTestCase(TransactionTestCase):
     def setUp(self):
-        self.user=User.objects.create_user(email='test@email.com',
-                                           username='TestUser',
-                                           password='test1234')
+        self.user = User.objects.create_user(email='test@email.com',
+                                             username='TestUser',
+                                             password='test1234')
         self.client.login(username='TestUser', password='test1234')
 
     def test_get_list(self):
@@ -57,7 +57,7 @@ class SubjectViewsTestCase(TransactionTestCase):
         response = self.client.get(reverse('dictionary:subject_list'), data={'search': 'łaciń'})
         expected_result = logged_user_subjects.filter(slug__icontains='lacin')
         self.assertQuerysetEqual(response.context['subject_list'], expected_result)
-        
+
         # when object does not exist or belongs to another user
         response = self.client.get(reverse('dictionary:subject_list'), data={'search': 'hiszpański'})
         self.assertQuerysetEqual(response.context['subject_list'], logged_user_subjects)
@@ -105,7 +105,7 @@ class SubjectViewsTestCase(TransactionTestCase):
         self.assertRedirects(response, reverse('dictionary:dict_list', args=[slugify(unidecode(new_title))]))
 
         # update using already existing title
-        subject = Subject.objects.create(title='Język Hiszpański', owner=self.user) # another Subject
+        subject = Subject.objects.create(title='Język Hiszpański', owner=self.user)  # another Subject
 
         new_title = 'Język Niemiecki'
         response = self.client.post(reverse('dictionary:subject_update', args=[subject.slug]),
@@ -147,9 +147,9 @@ class SubjectViewsTestCase(TransactionTestCase):
 
 class DictionaryViewsTestCase(TransactionTestCase):
     def setUp(self):
-        self.user=User.objects.create_user(email='test@email.com',
-                                           username='TestUser',
-                                           password='test1234')
+        self.user = User.objects.create_user(email='test@email.com',
+                                            username='TestUser',
+                                            password='test1234')
         self.subject = Subject.objects.create(title='Język angielski', owner=self.user)
 
         self.client.login(username='TestUser', password='test1234')

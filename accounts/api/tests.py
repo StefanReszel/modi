@@ -52,7 +52,7 @@ class LoginAndLogoutViewsTestCase(APITestCase):
         # With token in headers, but invalid data provided.
         response = self.client.post(url, data={'username_or_email': 'InvalidUser', 'password': 'test1234'},
                                     headers={'X-CSRFToken': csrftoken})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_logout(self):
         # Logging in as above

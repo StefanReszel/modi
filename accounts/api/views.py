@@ -65,7 +65,7 @@ class LoginView(AllowAnyMixin, views.APIView):
             user_data = UserSerializer(user, context={'request': request}).data
             return Response(user_data)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
 
 
 class LogoutView(IsMyAccountMixin, views.APIView):
