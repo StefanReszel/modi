@@ -34,7 +34,6 @@ class DictionarySerializer(CustomUpdate, NestedHyperlinkedModelSerializer):
 
     class Meta:
         model = Dictionary
-        # Check how field `subject` display in JSON document, append to `read_only_fields`.
         fields = ['url', 'id', 'slug', 'title', 'description', 'words']
         read_only_fields = ['url', 'id', 'slug']
 

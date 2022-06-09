@@ -27,7 +27,8 @@ urlpatterns = [
          template_name='words_and_learning/word_form.html'), name='word_form'),
 
     path('delete-word/<int:dictionary_id>/', views.WordsManagementView.as_view(action='delete'), name='word_delete'),
-    path('confirm-changes/<int:dictionary_id>/', views.WordsManagementView.as_view(action='confirm'), name='confirm_changes'),
+    path('confirm-changes/<int:dictionary_id>/', views.WordsManagementView.as_view(action='confirm'),
+         name='confirm_changes'),
     path('refresh-list/<int:dictionary_id>/', views.WordsManagementView.as_view(action='refresh'), name='refresh_list'),
     path('clear-list/<int:dictionary_id>/', views.WordsManagementView.as_view(action='clear'), name='clear_list'),
 

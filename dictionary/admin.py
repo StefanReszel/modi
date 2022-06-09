@@ -4,7 +4,7 @@ from .models import Subject, Dictionary
 
 @admin.register(Dictionary)
 class DictionaryAdmin(admin.ModelAdmin):
-    list_display = [ 'title', 'subject','owner']
+    list_display = ['title', 'subject', 'owner']
     ordering = ['subject', 'title']
     list_filter = ['subject__owner']
     search_fields = ['subject', 'title']
