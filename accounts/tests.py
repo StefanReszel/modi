@@ -6,54 +6,61 @@ from accounts.models import User
 from accounts.forms import PasswordResetForm
 
 
-class ViewsTestCase(TestCase):
+class EmailAuthenticationTestCase(TestCase):
+    """
+    Test of `accounts.backends.EmailAuthBackend`.
+    """
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(email='test@email.com',
                                             username='TestUser',
                                             password='test1234')
 
-    def test_email_auth_backend(self):
-        """
-        Test of `accounts.backends.EmailAuthBackend`.
-        """
-
+    def test_logging_with_valid_email_should_return_status_302(self):
         response = self.client.post(reverse("accounts:login"), data={"username": "test@email.com",
                                                                      "password": 'test1234',
                                                                      "next": reverse('dictionary:subject_list')})
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('dictionary:subject_list'))
 
+    def test_logging_with_invalid_email_should_return_status_200(self):
         response = self.client.post(reverse("accounts:login"), data={"username": "non-existent@email.com",
                                                                      "password": 'test',
                                                                      "next": reverse('dictionary:subject_list')})
         self.assertEqual(response.status_code, 200)
 
         response = self.client.post(reverse("accounts:login"), data={"username": "NonExistent",
-                                                                     "password": '1234',
-                                                                     "next": reverse('dictionary:subject_list')})
+                                                                     "password": '1234'})
         self.assertEqual(response.status_code, 200)
 
-    def test_raising_form_errors(self):
-        """
-        Test of `accounts.views.RaisingFormErrorsMixin`.
-        """
-        # incorrect data
-        data = {
+
+class RenderFormErrorsTestCase(TestCase):
+    """
+    Test of `accounts.views.RaisingFormErrorsMixin`.
+    """
+    def setUp(self):
+        self.invalid_data = {
             "username": "AnotherUser",
             "email": "it will be invalid",
             "password1": "test1234",
             "password2": "1234test",
         }
-        response = self.client.post(reverse("accounts:sign_up"), data=data)
+
+    def test_raising_form_errors_response_should_return_status_200(self):
+        response = self.client.post(reverse("accounts:sign_up"), data=self.invalid_data)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_raising_form_errors_response_should_contains_form_errors(self):
+        response = self.client.post(reverse("accounts:sign_up"), data=self.invalid_data)
+
         errors = dict(response.context['form'].errors)
+
         email_error = errors['email'][0]
         password_error = errors['password2'][0]
 
-        self.assertEqual(response.status_code, 200)
         self.assertContains(response, email_error)
         self.assertContains(response, password_error)
-        self.assertEqual(User.objects.count(), 1)
 
 
 class FormsTestCase(TestCase):
