@@ -49,3 +49,12 @@ docker-compose restart modi
 In your browser, go to <a href="http://localhost:8000/">http://localhost:8000/</a>
 <br>
 Enjoy!
+
+## Heroku
+You can also check it out <a href="https://agile-beyond-46801.herokuapp.com/">here.</a>
+<br>
+Sign in with credentials:
+<br>
+login: ```guest```
+<br>
+password: ```topsecret```
