@@ -31,9 +31,18 @@ git clone https://github.com/StefanoDaReel/modi.git
 ```
 Next, ensure you have Docker Compose installed, if not check the site <a href="https://docs.docker.com/compose/install/">https://docs.docker.com/compose/install/</a>
 <br>
-Now, from the app directiory(which contains docker-compose.yml file) run command
+Now, from the app directiory(which contains docker-compose.yml file) run command:
 ```
-docker-compose up
+docker-compose up -d
+```
+Another step is to make migrations to database, run these commands:
+```
+docker-comose exec django python manage.py makemigrations
+docker-comose exec django python manage.py migrate
+```
+Last thing to is to restart container where the MODi is running:
+```
+docker-compose restart django
 ```
 In your browser, go to <a href="http://localhost:8000/">http://localhost:8000/</a>
 <br>
