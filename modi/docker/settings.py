@@ -19,10 +19,10 @@ DATABASES = {
         'NAME': os.environ.get('POSTGRES_NAME'),
         'USER': os.environ.get('POSTGRES_USER'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': 'postgres',
+        'HOST': 'database',
         'PORT': 5432,
     },
 }
 
-CELERY_BROKER_URL = 'redis://redis:6379'
+CELERY_BROKER_URL = 'redis://broker:6379'
 CELERY_INCLUDE = ['accounts.tasks']

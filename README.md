@@ -37,14 +37,14 @@ docker-compose up -d
 ```
 Another step is to make migrations to database, run these commands:
 ```
-docker-compose exec django python manage.py makemigrations
+docker-compose exec modi python manage.py makemigrations
 ```
 ```
-docker-compose exec django python manage.py migrate
+docker-compose exec modi python manage.py migrate
 ```
 Last thing to is to restart container where the MODi is running:
 ```
-docker-compose restart django
+docker-compose restart modi
 ```
 In your browser, go to <a href="http://localhost:8000/">http://localhost:8000/</a>
 <br>

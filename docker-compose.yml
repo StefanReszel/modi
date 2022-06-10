@@ -1,43 +1,39 @@
 services:
-  postgres:
-    container_name: database
-    image: postgres
+  database:
+    image: postgres:${POSTGRES_VERSION}
     volumes:
       - modi-postgres-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=modi
-      - POSTGRES_USER=modi
-      - POSTGRES_PASSWORD=modi
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
-  django:
-    container_name: modi
+  modi:
     build: .
     volumes:
       - .:/code
     ports:
       - "8000:8000"
     environment:
-      - POSTGRES_NAME=modi
-      - POSTGRES_USER=modi
-      - POSTGRES_PASSWORD=modi
+      - POSTGRES_NAME=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
-      - postgres
-      - celery
+      - database
+      - mailer
     command: ["./wait-for-it.sh", "database:5432", "--", "python", "manage.py", "runserver", "0.0.0.0:8000"]
 
-  celery:
-    container_name: mailer
+  mailer:
     build: .
     command: celery -A accounts worker -l info
     volumes:
       - .:/code
     depends_on:
-      - redis
+      - broker
     restart: always
 
-  redis:
-    container_name: broker
-    image: redis
+  broker:
+    image: redis:${REDIS_VERSION}
     restart: always
 
 volumes:
