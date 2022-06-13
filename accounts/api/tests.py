@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -12,10 +12,7 @@ from accounts.api.serializers import PasswordResetSerializer
 from accounts.api.views import PasswordConfirmView
 
 
-class LoginAndLogoutViewsTestCase(APITestCase):
-    """
-    Add test for `LogoutView` ! ! !
-    """
+class LoginViewTestCase(APITestCase):
     client_class = RequestsClient
 
     @classmethod
@@ -24,52 +21,60 @@ class LoginAndLogoutViewsTestCase(APITestCase):
                                             username='TestUser',
                                             password='test1234')
 
-    def test_login(self):
-        # Making URL for tests
+    def setUp(self):
+        # Making full URL for tests
         factory = APIRequestFactory()
-        request = factory.request()
-        url = reverse('login', request=request)
+        self.request = factory.request()
+
+        self.login_url = reverse('login', request=self.request)
 
         # Obtaining a CSRF token.
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        csrftoken = response.cookies['csrftoken']
+        response = self.client.get(self.login_url)
 
-        # Test without passing token to headers
-        response = self.client.post(url, data={'username_or_email': 'TestUser', 'password': 'test1234'})
+        self.csrftoken = response.cookies['csrftoken']
+
+    def test_login_without_passing_csrf_token_to_headers_should_return_status_403(self):
+        response = self.client.post(self.login_url, data={'username_or_email': 'TestUser', 'password': 'test1234'})
+
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        # Token passed to header
-        response = self.client.post(url, data={'username_or_email': 'TestUser', 'password': 'test1234'},
-                                    headers={'X-CSRFToken': csrftoken})
+    def test_login_with_passing_csrf_token_to_headers_should_return_status_200(self):
+        response = self.client.post(self.login_url, data={'username_or_email': 'TestUser', 'password': 'test1234'},
+                                    headers={'X-CSRFToken': self.csrftoken})
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # Obtaining a CSRF token.
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        csrftoken = response.cookies['csrftoken']
+    def test_login_with_passing_csrf_token_to_headers_but_providing_invalid_data_should_return_status_404(self):
+        response = self.client.post(self.login_url, data={'username_or_email': 'InvalidUser', 'password': 'test1234'},
+                                    headers={'X-CSRFToken': self.csrftoken})
 
-        # With token in headers, but invalid data provided.
-        response = self.client.post(url, data={'username_or_email': 'InvalidUser', 'password': 'test1234'},
-                                    headers={'X-CSRFToken': csrftoken})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_logout(self):
-        # Logging in as above
+
+class LogoutViewsTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(email='test@email.com',
+                                            username='TestUser',
+                                            password='test1234')
+
+    def setUp(self):
+        # Making full URL for tests
         factory = APIRequestFactory()
-        request = factory.request()
-        url = reverse('login', request=request)
+        self.request = factory.request()
 
-        response = self.client.get(url)
-        csrftoken = response.cookies['csrftoken']
+        self.login_url = reverse('login', request=self.request)
+        self.logout_url = reverse('logout', request=self.request)
 
-        response = self.client.post(url, data={'username_or_email': 'TestUser', 'password': 'test1234'},
-                                    headers={'X-CSRFToken': csrftoken})
+        # signing in and obtaining a csrf token
+        response_with_csrf_token_to_login = self.client.get(self.login_url)
+        response = self.client.post(self.login_url, data={'username_or_email': 'TestUser', 'password': 'test1234'},
+                                    headers={'X-CSRFToken': response_with_csrf_token_to_login.cookies['csrftoken']})
 
-        # signing out
-        url = reverse('logout', request=request)
-        csrftoken = response.cookies['csrftoken']
-        response = self.client.post(url, headers={'X-CSRFToken': csrftoken})
+        self.csrftoken = response.cookies['csrftoken']
+
+    def test_logout_should_return_status_200(self):
+        response = self.client.post(self.logout_url, headers={'X-CSRFToken': self.csrftoken})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -77,86 +82,111 @@ class LoginAndLogoutViewsTestCase(APITestCase):
 class UserDetailViewTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(email='test@email.com',
-                                            username='TestUser',
-                                            password='test1234')
+        user = User.objects.create_user(email='test@email.com',
+                                        username='TestUser',
+                                        password='test1234')
 
-        cls.another_user = User.objects.create_user(email='another-test@email.com',
-                                                    username='AnotherTestUser',
-                                                    password='test1234')
+        cls.user_id = user.id
+
+        another_user = User.objects.create_user(email='another-test@email.com',
+                                                username='AnotherTestUser',
+                                                password='test1234')
+
+        cls.another_user_id = another_user.id
 
     def setUp(self):
         self.client.login(username='TestUser', password='test1234')
 
-    def test_get_method(self):
-        # test getting data of logged user
-        response = self.client.get(reverse('user-detail', args=[self.user.id]))
+        self.user = User.objects.get(id=self.user_id)
+        self.another_user = User.objects.get(id=self.another_user_id)
+
+    def test_http_get_method_by_logged_user_should_return_status_200(self):
+        response = self.client.get(reverse('user-detail', args=[self.user_id]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # test getting data of another, not logged user
-        response = self.client.get(reverse('user-detail', args=[self.another_user.id]))
+    def test_http_get_method_by_not_logged_user_should_return_status_403(self):
+        response = self.client.get(reverse('user-detail', args=[self.another_user_id]))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        # test updating user by diffrent methods
-        response = self.client.put(reverse('user-detail', args=[self.user.id]),
+    def test_http_put_method_by_logged_user_should_return_status_200(self):
+        response = self.client.put(reverse('user-detail', args=[self.user_id]),
                                    data={'email': 'new-email@test.com',
                                          'old_password': 'test1234',
                                          'new_password': 'new-password'})
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        self.user = User.objects.get(id=self.user.id)
-        self.assertEqual(self.user.email, 'new-email@test.com')
-        self.assertTrue(self.user.check_password('new-password'))
+    def test_subsequent_to_http_put_method_user_object_should_have_new_email(self):
+        old_email = self.user.email
+        new_email = 'new-email@test.com'
 
-        response = self.client.patch(reverse('user-detail', args=[self.user.id]),
+        self.client.put(reverse('user-detail', args=[self.user_id]),
+                        data={'email': new_email,
+                              'old_password': 'test1234',
+                              'new_password': 'new-password'})
+        user = User.objects.get(id=self.user_id)
+
+        self.assertNotEqual(user, old_email)
+        self.assertEqual(user.email, new_email)
+
+    def test_subsequent_to_http_put_method_user_object_should_have_new_password(self):
+        old_password = 'test1234'
+        new_password = 'new-password'
+
+        self.client.put(reverse('user-detail', args=[self.user_id]),
+                        data={'email': 'new-email@test.com',
+                              'old_password': old_password,
+                              'new_password': new_password})
+        user = User.objects.get(id=self.user_id)
+
+        self.assertFalse(user.check_password(old_password))
+        self.assertTrue(user.check_password(new_password))
+
+    def test_http_patch_method_by_logged_user_should_return_status_200(self):
+        response = self.client.patch(reverse('user-detail', args=[self.user_id]),
                                      data={'email': 'test@email.com'})
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        response = self.client.patch(reverse('user-detail', args=[self.user.id]),
-                                     data={'old_password': 'new-password',
-                                           'new_password': 'test1234'})
+        response = self.client.patch(reverse('user-detail', args=[self.user_id]),
+                                     data={'old_password': 'test1234',
+                                           'new_password': 'new-password'})
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        response = self.client.patch(reverse('user-detail', args=[self.user.id]),
-                                     data={'old_password': 'new-password',
-                                           'new_password': 'test1234'})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-
-class PasswordResetTestCase(APITestCase):
+class PasswordResetSerializerTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        PasswordResetSerializer.send_mail = Mock()
-
         cls.user = User.objects.create_user(email='test@email.com',
                                             username='TestUser',
                                             password='test1234')
 
-    def test_get_user(self):
-        """
-        testing method of PasswordResetSerializer
-        """
-        serializer = PasswordResetSerializer()
+    def setUp(self):
+        self.serializer = PasswordResetSerializer()
 
-        # getting user with e-mail
-        user = serializer.get_user('test@email.com')
+    def test_get_user_method_should_return_user_object_when_valid_email_provided(self):
+        user = self.serializer.get_user('test@email.com')
+
         self.assertTrue(isinstance(user, User))
 
-        # getting user with username
-        user = serializer.get_user('TestUser')
+    def test_get_user_method_should_return_user_object_when_valid_username_provided(self):
+        user = self.serializer.get_user('TestUser')
+
         self.assertTrue(isinstance(user, User))
 
-        # getting user with invalid data
-        user = serializer.get_user('NonexistentUser')
+    def test_get_user_method_should_return_none_when_invalid_email_provided(self):
+        user = self.serializer.get_user('nonexistent@email.com')
+
         self.assertIsNone(user)
 
-        user = serializer.get_user('nonexistent@email.com')
+    def test_get_user_method_should_return_none_when_invalid_username_provided(self):
+        user = self.serializer.get_user('NonexistentUser')
+
         self.assertIsNone(user)
 
-    def test_save(self):
-        """
-        testing method of PasswordResetSerializer
-        """
+    @patch('accounts.api.serializers.PasswordResetSerializer.send_mail')
+    def test_save_method_should_invoke_send_mail_method(self, send_mail_mock):
         serializer = PasswordResetSerializer(data={'username_or_email': 'test@email.com'})
 
         serializer.is_valid(raise_exception=True)
@@ -172,13 +202,13 @@ class PasswordResetTestCase(APITestCase):
 
         serializer.save(**opts)
 
-        serializer.send_mail.assert_called_once()
+        send_mail_mock.assert_called_once()
 
-    def test_view(self):
-        """
-        test of PasswordResetView
-        """
+
+class PasswordResetViewTestCase(APITestCase):
+    def test_when_http_post_method_view_should_return_status_200(self):
         response = self.client.post(reverse('password-reset'), data={'username_or_email': 'test@email.com'})
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
@@ -191,19 +221,23 @@ class PasswordConfirmViewTestCase(APITestCase):
 
         cls.uid = urlsafe_base64_encode(force_bytes(cls.user.pk))
 
-    def test_post(self):
+    def setUp(self):
         PasswordConfirmView.token_generator = Mock()
 
+    def test_when_http_post_method_with_proper_view_should_return_status_200(self):
         response = self.client.post(reverse('password-confirm'), data={
             'new_password': 'TopSecret', 'uid': self.uid, 'token': 'abcde12345'})
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # case with invalid uid
+    def test_when_http_post_method_with_invalid_uid_view_should_return_status_400(self):
         response = self.client.post(reverse('password-confirm'), data={
             'new_password': 'TopSecret', 'uid': 'invalid', 'token': 'abcde12345'})
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-        # case with invalid password
+    def test_when_http_post_method_with_invalid_password_view_should_return_status_400(self):
         response = self.client.post(reverse('password-confirm'), data={
             'new_password': 'top', 'uid': self.uid, 'token': 'abcde12345'})
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

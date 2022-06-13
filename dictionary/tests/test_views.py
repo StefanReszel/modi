@@ -119,7 +119,7 @@ class SubjectViewsTestCase(TransactionTestCase):
 
         # checking whether object in context has a primal title
         self.assertEqual(response.context['subject'].title, 'Język Hiszpański')
-        
+
         # a case with no data
         response = self.client.post(reverse('dictionary:subject_update', args=[subject.slug]), data={"title": ""})
         self.assertEqual(response.status_code, 200)
@@ -127,8 +127,8 @@ class SubjectViewsTestCase(TransactionTestCase):
     def test_delete(self):
         self.assertEqual(self.user.subjects.count(), 0)
 
-         # creating `Subject` object to delete
-        subject = Subject.objects.create(title='Język angielski', owner=self.user)       
+        # creating `Subject` object to delete
+        subject = Subject.objects.create(title='Język angielski', owner=self.user)
         self.assertEqual(self.user.subjects.count(), 1)
 
         # test GET
@@ -148,8 +148,8 @@ class SubjectViewsTestCase(TransactionTestCase):
 class DictionaryViewsTestCase(TransactionTestCase):
     def setUp(self):
         self.user = User.objects.create_user(email='test@email.com',
-                                            username='TestUser',
-                                            password='test1234')
+                                             username='TestUser',
+                                             password='test1234')
         self.subject = Subject.objects.create(title='Język angielski', owner=self.user)
 
         self.client.login(username='TestUser', password='test1234')
@@ -201,7 +201,7 @@ class DictionaryViewsTestCase(TransactionTestCase):
                                    data={'search': 'Film "Titanic"'})
         expected_result = concrete_dictionaries.filter(slug__icontains='film-titanic')
         self.assertQuerysetEqual(response.context['dictionary_list'], expected_result)
-        
+
         # when object does not exist or is in another subject
         response = self.client.get(reverse('dictionary:dict_list', args=[self.subject.slug]),
                                    data={'search': 'harry potter'})
@@ -254,16 +254,16 @@ class DictionaryViewsTestCase(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('dictionary', response.context)
 
-
         # update by POST
         new_title = 'Książka'
         response = self.client.post(reverse('dictionary:dict_update', args=[dictionary.subject.slug, dictionary.slug]),
                                     data={'title': new_title})
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('dictionary:dict_detail', args=[dictionary.subject.slug, slugify(unidecode(new_title))]))
+        self.assertRedirects(response, reverse('dictionary:dict_detail',
+                                               args=[dictionary.subject.slug, slugify(unidecode(new_title))]))
 
         # update using already existing title
-        dictionary = Dictionary.objects.create(title='Lektura', subject=self.subject) # another Dictionary
+        dictionary = Dictionary.objects.create(title='Lektura', subject=self.subject)  # another Dictionary
 
         new_title = 'Książka'
         response = self.client.post(reverse('dictionary:dict_update', args=[dictionary.subject.slug, dictionary.slug]),
@@ -288,10 +288,10 @@ class DictionaryViewsTestCase(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_delete(self):
-        self.assertEqual(self.subject.dicts.count(), 0)        
+        self.assertEqual(self.subject.dicts.count(), 0)
 
-         # creating `Dictionary` object to delete
-        dictionary = Dictionary.objects.create(title='Książka', subject=self.subject)       
+        # creating `Dictionary` object to delete
+        dictionary = Dictionary.objects.create(title='Książka', subject=self.subject)
         self.assertEqual(self.subject.dicts.count(), 1)
 
         # test GET
@@ -311,14 +311,14 @@ class DictionaryViewsTestCase(TransactionTestCase):
 class WordFormViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user=User.objects.create_user(email='test@email.com',
-                                           username='TestUser',
-                                           password='test1234')
+        cls.user = User.objects.create_user(email='test@email.com',
+                                            username='TestUser',
+                                            password='test1234')
         cls.subject = Subject.objects.create(title='Język angielski',
-                                              owner=cls.user)
+                                             owner=cls.user)
         cls.dictionary = Dictionary.objects.create(title='Podręcznik',
-                                                    description='Klasa I',
-                                                    subject=cls.subject)
+                                                   description='Klasa I',
+                                                   subject=cls.subject)
 
     def setUp(self):
         self.client.login(username='TestUser', password='test1234')
@@ -348,8 +348,8 @@ class WordFormViewTestCase(TestCase):
 
         # with no data
         response = self.client.post(reverse('dictionary:word_form',
-                                                    args=[self.dictionary.subject.slug, self.dictionary.slug]),
-                                            data={'word': '', 'definition': ''})
+                                            args=[self.dictionary.subject.slug, self.dictionary.slug]),
+                                    data={'word': '', 'definition': ''})
         self.assertEqual(response.status_code, 200)
 
         response = self.client.post(reverse('dictionary:word_form',
@@ -366,15 +366,15 @@ class WordFormViewTestCase(TestCase):
 class WordsManagementView(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user=User.objects.create_user(email='test@email.com',
-                                           username='TestUser',
-                                           password='test1234')
+        cls.user = User.objects.create_user(email='test@email.com',
+                                            username='TestUser',
+                                            password='test1234')
         cls.subject = Subject.objects.create(title='Język angielski',
-                                              owner=cls.user)
+                                             owner=cls.user)
         cls.dictionary = Dictionary.objects.create(title='Podręcznik',
-                                                    description='Klasa I',
-                                                    subject=cls.subject,
-                                                    words = {'gitara': 'guitar'})
+                                                   description='Klasa I',
+                                                   subject=cls.subject,
+                                                   words={'gitara': 'guitar'})
 
     def setUp(self):
         self.client.login(username='TestUser', password='test1234')
@@ -395,7 +395,7 @@ class WordsManagementView(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('dictionary:word_form',
                                                args=[self.dictionary.subject.slug, self.dictionary.slug]))
-        
+
         response = self.client.post(reverse('dictionary:confirm_changes', args=[self.dictionary.id]))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('dictionary:dict_detail',
@@ -405,13 +405,13 @@ class WordsManagementView(TestCase):
 class LearningViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user=User.objects.create_user(email='test@email.com',
-                                           username='TestUser',
-                                           password='test1234')
+        cls.user = User.objects.create_user(email='test@email.com',
+                                            username='TestUser',
+                                            password='test1234')
         cls.subject = Subject.objects.create(title='Język angielski',
-                                              owner=cls.user)
+                                             owner=cls.user)
         cls.dictionary = Dictionary.objects.create(title='Podręcznik',
-                                                    subject=cls.subject)
+                                                   subject=cls.subject)
 
     def setUp(self):
         self.client.login(username='TestUser', password='test1234')

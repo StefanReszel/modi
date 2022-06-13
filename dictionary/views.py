@@ -100,20 +100,16 @@ class SearchMixin:
         """
         self.query = self.request.GET.get('search')
 
-        # when QuerySet is empty, i.e. user has not any subjects or dictionaries
         if not queryset:
             messages.info(self.request, self.get_empty_queryset_message())
             return queryset
-        # when no query, returns all
         if self.query is not None:
-            # when there was nothing writed in search form, returns all
             if self.query == "":
                 messages.info(self.request, self.get_empty_form_field_message())
                 return queryset
             self.extra_context = {'value': self.query}
             found = queryset.filter(
                 slug__icontains=slugify(unidecode(self.query)))
-            # when found nothing, returns all
             if not found:
                 messages.info(self.request, self.get_not_found_message())
                 return queryset

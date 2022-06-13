@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.test import TestCase
 from django.urls import reverse
 
@@ -63,43 +65,56 @@ class RenderFormErrorsTestCase(TestCase):
         self.assertContains(response, password_error)
 
 
-class FormsTestCase(TestCase):
+class PasswordResetFormTestCase(TestCase):
+    """
+    Test of `accounts.forms.PasswordResetForm.get_users`.
+    """
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(email='test@email.com',
                                             username='TestUser',
                                             password='test1234')
 
-    def test_modi_password_reset_form(self):
-        """
-        Test of `accounts.forms.PasswordResetForm.get_users`.
-        """
-        form = PasswordResetForm()
+    def setUp(self):
+        self.form = PasswordResetForm()
 
-        users = form.get_users('test@email.com')
+    @patch('django.contrib.auth.forms.PasswordResetForm.get_users')
+    def test_method_get_users_of_form_should_invoke_parent_method_when_valid_email_provided(self, get_users_mock):
+        self.form.get_users('test@email.com')
+
+        get_users_mock.assert_called()
+
+    @patch('django.contrib.auth.forms.PasswordResetForm.get_users')
+    def test_method_get_users_of_form_should_invoke_parent_method_when_invalid_email_provided(self, get_users_mock):
+        self.form.get_users('non-existent@email.com')
+
+        get_users_mock.assert_called()
+
+    def test_method_get_users_of_form_should_return_iterable_with_one_user_when_valid_username_provided(self):
+        users = self.form.get_users('TestUser')
+
         self.assertIn(self.user, users)
+        self.assertEqual(len(users), 1)
 
-        users = form.get_users('non-existent@email.com')
+    def test_method_get_users_of_form_should_return_empty_iterable_when_invalid_username_provided(self):
+        users = self.form.get_users('NonExistent')
+
         self.assertNotIn(self.user, users)
-
-        users = form.get_users('TestUser')
-        self.assertIn(self.user, users)
-
-        users = form.get_users('NonExistent')
-        self.assertNotIn(self.user, users)
+        self.assertEqual(len(users), 0)
 
 
 class TasksTestCase(TestCase):
     """
     Test of `accounts.tasks.async_send_email`.
     """
-    def test_async_send_email(self):
-        subject_template_name = 'accounts/modi/email/password_reset_subject.txt'
-        email_template_name = 'accounts/modi/email/password_reset_email.html'
-        from_email = 'MODi - My Own Dictionary'
-        user_email = "user@example.com"
-        context = {
-                'email': user_email,
+
+    def setUp(self):
+        self.subject_template_name = 'accounts/modi/email/password_reset_subject.txt'
+        self.email_template_name = 'accounts/modi/email/password_reset_email.html'
+        self.from_email = 'MODi - My Own Dictionary'
+        self.user_email = "user@example.com"
+        self.context = {
+                'email': self.user_email,
                 'domain': "www.modi.pl",
                 'site_name': "modi",
                 'uid': 1,
@@ -108,6 +123,15 @@ class TasksTestCase(TestCase):
                 'protocol': 'https',
             }
 
-        result = async_send_email(subject_template_name, email_template_name, context, from_email, to_email=user_email)
+    @patch('accounts.tasks.EmailMultiAlternatives.send')
+    def test_async_send_email_should_invoke_send_method_of_email_multi_alternatives(self, send_mock):
 
-        self.assertEqual(result, 1)
+        async_send_email(
+            self.subject_template_name,
+            self.email_template_name,
+            self.context,
+            self.from_email,
+            to_email=self.user_email,
+            )
+
+        send_mock.assert_called()
