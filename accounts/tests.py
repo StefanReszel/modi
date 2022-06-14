@@ -21,9 +21,8 @@ class EmailAuthenticationTestCase(TestCase):
     def test_logging_with_valid_email_should_return_status_302(self):
         response = self.client.post(reverse("accounts:login"), data={"username": "test@email.com",
                                                                      "password": 'test1234',
-                                                                     "next": reverse('dictionary:subject_list')})
+                                                                     })
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('dictionary:subject_list'))
 
     def test_logging_with_invalid_email_should_return_status_200(self):
         response = self.client.post(reverse("accounts:login"), data={"username": "non-existent@email.com",
