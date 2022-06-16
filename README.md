@@ -33,19 +33,9 @@ Next, ensure you have Docker Compose installed, if not check the site <a href="h
 <br>
 Now, from the app directiory(which contains docker-compose.yml file) run command:
 ```
-docker-compose up -d
+docker-compose up
 ```
-Another step is to make migrations to database, run these commands:
-```
-docker-compose exec modi python manage.py makemigrations
-```
-```
-docker-compose exec modi python manage.py migrate
-```
-Last thing to is to restart container where the MODi is running:
-```
-docker-compose restart modi
-```
+
 In your browser, go to <a href="http://localhost:8000/">http://localhost:8000/</a>
 <br>
 Enjoy!
