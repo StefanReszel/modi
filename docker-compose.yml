@@ -27,7 +27,12 @@ services:
           condition: service_started
         database:
           condition: service_healthy
-    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    entrypoint: ["bash", "-c"]
+    command:
+      - |
+        python manage.py makemigrations
+        python manage.py migrate
+        python manage.py runserver 0.0.0.0:8000
 
   mailer:
     build: .
