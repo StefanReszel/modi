@@ -10,8 +10,9 @@ class CustomUpdate:
         update_fields = []
 
         for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-            update_fields.append(attr)
+            if hasattr(instance, attr):
+                setattr(instance, attr, value)
+                update_fields.append(attr)
 
         instance.save(update_fields=update_fields)
         return instance

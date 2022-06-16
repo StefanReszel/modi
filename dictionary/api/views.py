@@ -25,14 +25,13 @@ class SearchMixin:
         will return all subjects or dictionaries with them in title.
         """
         query = self.request.query_params.get('search')
-        # when either no query or empty string given, returns all
         if query:
-            found = queryset.filter(
-                slug__icontains=slugify(unidecode(query)))
-            # if found nothing, returns all
-            if not found:
-                return queryset
-            return found
+            if queryset:
+                found = queryset.filter(
+                    slug__icontains=slugify(unidecode(query)))
+                if not found:
+                    return queryset
+                return found
         return queryset
 
 

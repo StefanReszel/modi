@@ -23,7 +23,6 @@ class User(AbstractUser):
         )
 
     def __json__(self):
-        # to enable serialization by `Celery`
         return {
             'id': self.id,
             'username': self.username,

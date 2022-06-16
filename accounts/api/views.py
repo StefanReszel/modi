@@ -61,7 +61,6 @@ class LoginView(AllowAnyMixin, views.APIView):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             login(request, user)
-            # context['request'] is used at the `UserSerializer.get_subjects`
             user_data = UserSerializer(user, context={'request': request}).data
             return Response(user_data)
         else:

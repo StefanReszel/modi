@@ -69,19 +69,26 @@ class CustomProcessFormMixin(GetSubjectObjectMixin):
         try:
             self.object.save()
             messages.success(self.request, self.get_success_message())
-            return redirect(self.get_success_url())
         except IntegrityError:
             if "Update" in class_name:
-                # reversing changes in self.object, without this,
-                # breadcrumbs (in HTML) will render improperly
-                self.object = self.get_object()
+                self.__assign_object_from_db()
+
             messages.error(self.request, self.get_error_message())
             messages.info(self.request, self.get_info_message())
+
             return super().form_invalid(form)
+        else:
+            return redirect(self.get_success_url())
 
     def form_invalid(self, form):
         messages.error(self.request, self.get_error_message())
         return super().form_invalid(form)
+
+    def __assign_object_from_db(self):
+        """
+        Without this, breadcrumbs in HTML template will render improperly.
+        """
+        self.object = self.get_object()
 
     def get_success_message(self): return "SUCCESS"
 
@@ -266,10 +273,11 @@ class WordFormView(LoginRequiredMixin, GetDictionaryObjectMixin, FormView):
         try:
             self.words.add_word(word=cd['word'],
                                 definition=cd['definition'])
-            return super().form_valid(form)
         except DuplicateError:
             messages.error(self.request, 'Definicja o takiej treści już istnieje.')
             return super().form_invalid(form)
+        else:
+            return super().form_valid(form)
 
 
 class WordsManagementView(LoginRequiredMixin, View):

@@ -22,13 +22,11 @@ class LoginViewTestCase(APITestCase):
                                             password='test1234')
 
     def setUp(self):
-        # Making full URL for tests
         factory = APIRequestFactory()
         self.request = factory.request()
 
         self.login_url = reverse('login', request=self.request)
 
-        # Obtaining a CSRF token.
         response = self.client.get(self.login_url)
 
         self.csrftoken = response.cookies['csrftoken']
@@ -59,14 +57,12 @@ class LogoutViewsTestCase(APITestCase):
                                             password='test1234')
 
     def setUp(self):
-        # Making full URL for tests
         factory = APIRequestFactory()
         self.request = factory.request()
 
         self.login_url = reverse('login', request=self.request)
         self.logout_url = reverse('logout', request=self.request)
 
-        # signing in and obtaining a csrf token
         response_with_csrf_token_to_login = self.client.get(self.login_url)
         response = self.client.post(self.login_url, data={'username_or_email': 'TestUser', 'password': 'test1234'},
                                     headers={'X-CSRFToken': response_with_csrf_token_to_login.cookies['csrftoken']})
