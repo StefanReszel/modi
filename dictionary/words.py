@@ -27,8 +27,7 @@ class Words:
         """
         Returns sorted by word list of tuples.
         """
-        return sorted(self.words.items(),
-                      key=lambda items: items[1].lower())
+        return sorted(self.words.items(), key=lambda items: items[1].lower())
 
     def clear_list(self):
         """
@@ -62,7 +61,9 @@ class Words:
 
 class DuplicateError(Exception):
     def __init__(self):
-        super().__init__("Word with the same definition is already exist in this dictionary.")
+        super().__init__(
+            "Word with the same definition is already exist in this dictionary."
+        )
 
 
 class DefinitionDoesNotExist(Exception):

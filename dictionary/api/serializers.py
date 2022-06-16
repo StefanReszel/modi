@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer, NestedHyperlinkedIdentityField
+from rest_framework_nested.serializers import (
+    NestedHyperlinkedModelSerializer,
+    NestedHyperlinkedIdentityField,
+)
 
 
 from ..models import Subject, Dictionary
@@ -19,24 +22,28 @@ class CustomUpdate:
 
 
 class SubjectSerializer(CustomUpdate, serializers.HyperlinkedModelSerializer):
-    dictionaries = serializers.HyperlinkedIdentityField(view_name='dictionary-list', lookup_url_kwarg='subject_pk')
+    dictionaries = serializers.HyperlinkedIdentityField(
+        view_name="dictionary-list", lookup_url_kwarg="subject_pk"
+    )
 
     class Meta:
         model = Subject
-        fields = ['url', 'id', 'slug', 'title', 'dictionaries']
-        read_only_fields = ['url', 'id', 'slug']
+        fields = ["url", "id", "slug", "title", "dictionaries"]
+        read_only_fields = ["url", "id", "slug"]
 
 
 class DictionarySerializer(CustomUpdate, NestedHyperlinkedModelSerializer):
     parent_lookup_kwargs = {
-        'subject_pk': 'subject__id',
-        }
-    words = NestedHyperlinkedIdentityField(view_name='dictionary-words', parent_lookup_kwargs=parent_lookup_kwargs)
+        "subject_pk": "subject__id",
+    }
+    words = NestedHyperlinkedIdentityField(
+        view_name="dictionary-words", parent_lookup_kwargs=parent_lookup_kwargs
+    )
 
     class Meta:
         model = Dictionary
-        fields = ['url', 'id', 'slug', 'title', 'description', 'words']
-        read_only_fields = ['url', 'id', 'slug']
+        fields = ["url", "id", "slug", "title", "description", "words"]
+        read_only_fields = ["url", "id", "slug"]
 
 
 class WordSerializer(serializers.Serializer):

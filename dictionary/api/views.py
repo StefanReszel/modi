@@ -6,7 +6,12 @@ from django.db import IntegrityError
 from django.utils.text import slugify
 from unidecode import unidecode
 
-from .serializers import SubjectSerializer, DictionarySerializer, WordSerializer, WordToDeleteSerializer
+from .serializers import (
+    SubjectSerializer,
+    DictionarySerializer,
+    WordSerializer,
+    WordToDeleteSerializer,
+)
 from .permissions import IsOwnerPermission
 from ..models import Subject
 from ..words import Words, DuplicateError, DefinitionDoesNotExist
@@ -24,11 +29,10 @@ class SearchMixin:
         It means 'ŁOŚ' is the same lookup such as 'los', so method
         will return all subjects or dictionaries with them in title.
         """
-        query = self.request.query_params.get('search')
+        query = self.request.query_params.get("search")
         if query:
             if queryset:
-                found = queryset.filter(
-                    slug__icontains=slugify(unidecode(query)))
+                found = queryset.filter(slug__icontains=slugify(unidecode(query)))
                 if not found:
                     return queryset
                 return found
@@ -46,15 +50,19 @@ class SubjectViewSet(IsAuthenticatedOwnerMixin, SearchMixin, viewsets.ModelViewS
         try:
             serializer.save(owner=self.request.user)
         except IntegrityError:
-            raise serializers.ValidationError(["Dodawanie tematu się nie powiodło.",
-                  "Temat o takiej lub podobnej nazwie najprawdopodobniej już istnieje."])
+            raise serializers.ValidationError(
+                [
+                    "Dodawanie tematu się nie powiodło.",
+                    "Temat o takiej lub podobnej nazwie najprawdopodobniej już istnieje.",
+                ]
+            )
 
 
 class DictionaryViewSet(IsAuthenticatedOwnerMixin, SearchMixin, viewsets.ModelViewSet):
     serializer_class = DictionarySerializer
 
     def dispatch(self, request, *args, **kwargs):
-        subject_id = self.kwargs.get('subject_pk')
+        subject_id = self.kwargs.get("subject_pk")
         try:
             self.subject = Subject.objects.get(id=subject_id)
         except Subject.DoesNotExist:
@@ -71,8 +79,12 @@ class DictionaryViewSet(IsAuthenticatedOwnerMixin, SearchMixin, viewsets.ModelVi
         try:
             serializer.save(subject=self.subject)
         except IntegrityError:
-            raise serializers.ValidationError(["Dodawanie słownika się nie powiodło.",
-                  "Słownik o takiej lub podobnej nazwie najprawdopodobniej już istnieje."])
+            raise serializers.ValidationError(
+                [
+                    "Dodawanie słownika się nie powiodło.",
+                    "Słownik o takiej lub podobnej nazwie najprawdopodobniej już istnieje.",
+                ]
+            )
 
     @action(detail=True)
     def words(self, request, *args, **kwargs):
@@ -82,7 +94,7 @@ class DictionaryViewSet(IsAuthenticatedOwnerMixin, SearchMixin, viewsets.ModelVi
         dictionary = self.get_object()
         return Response(data=dictionary.words)
 
-    @action(detail=True, url_path='words/edit')
+    @action(detail=True, url_path="words/edit")
     def edit_words(self, request, *args, **kwargs):
         """
         Returns words from session.
@@ -97,7 +109,7 @@ class DictionaryViewSet(IsAuthenticatedOwnerMixin, SearchMixin, viewsets.ModelVi
         """
         words = Words(request, self.get_object())
         words.save_to_db()
-        return Response(data={'status': 'OK'})
+        return Response(data={"status": "OK"})
 
     @edit_words.mapping.put
     def add_word(self, request, *args, **kwargs):
@@ -105,11 +117,15 @@ class DictionaryViewSet(IsAuthenticatedOwnerMixin, SearchMixin, viewsets.ModelVi
         if serializer.is_valid():
             words = Words(request, self.get_object())
             try:
-                words.add_word(serializer.validated_data['word'],
-                               serializer.validated_data['definition'])
+                words.add_word(
+                    serializer.validated_data["word"],
+                    serializer.validated_data["definition"],
+                )
             except DuplicateError as error:
                 raise serializers.ValidationError(error)
-            return Response(data=dict(words.get_words()), status=status.HTTP_201_CREATED)
+            return Response(
+                data=dict(words.get_words()), status=status.HTTP_201_CREATED
+            )
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @edit_words.mapping.delete
@@ -118,12 +134,12 @@ class DictionaryViewSet(IsAuthenticatedOwnerMixin, SearchMixin, viewsets.ModelVi
         serializer = WordToDeleteSerializer(data=request.data)
         serializer.is_valid()
         try:
-            words.remove_word(serializer.data.get('definition'))
+            words.remove_word(serializer.data.get("definition"))
         except DefinitionDoesNotExist as error:
             raise serializers.ValidationError(error)
         return Response(data=dict(words.get_words()))
 
-    @action(detail=True, url_path='words/edit/refresh', methods=['POST'])
+    @action(detail=True, url_path="words/edit/refresh", methods=["POST"])
     def refresh_words(self, request, *args, **kwargs):
         """
         Copies words from `Dictionary` object to session.

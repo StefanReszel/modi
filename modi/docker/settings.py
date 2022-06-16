@@ -14,15 +14,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_NAME'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': 'database',
-        'PORT': 5432,
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("POSTGRES_NAME"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": "database",
+        "PORT": 5432,
     },
 }
 
-CELERY_BROKER_URL = 'redis://broker:6379'
-CELERY_INCLUDE = ['accounts.tasks']
+CELERY_BROKER_URL = "redis://broker:6379"
+CELERY_INCLUDE = ["accounts.tasks"]

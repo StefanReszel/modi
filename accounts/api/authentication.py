@@ -5,7 +5,7 @@ class LoginAuthentication(SessionAuthentication):
     def authenticate(self, request):
         self.enforce_csrf(request)
 
-        user = getattr(request._request, 'user', None)
+        user = getattr(request._request, "user", None)
 
         if not user or not user.is_active:
             return None

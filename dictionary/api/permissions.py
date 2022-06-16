@@ -8,4 +8,4 @@ class IsOwnerPermission(BasePermission):
         return obj.owner == request.user
 
     def __object_is_dictionary(self, obj):
-        return hasattr(obj, 'subject')
+        return hasattr(obj, "subject")

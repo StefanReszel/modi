@@ -7,11 +7,15 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 30s
+      retries: 6
+    restart: always
 
   modi:
     build: .
-    volumes:
-      - .:/code
     ports:
       - "8000:8000"
     environment:
@@ -19,15 +23,15 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
-      - database
-      - mailer
-    command: ["./wait-for-it.sh", "database:5432", "--", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+        mailer:
+          condition: service_started
+        database:
+          condition: service_healthy
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
   mailer:
     build: .
     command: celery -A accounts worker -l info
-    volumes:
-      - .:/code
     depends_on:
       - broker
     restart: always

@@ -19,21 +19,21 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'email', 'subjects']
-        read_only_fields = ['id']
+        fields = ["id", "username", "password", "email", "subjects"]
+        read_only_fields = ["id"]
         extra_kwargs = {
-            'password': {
-                'write_only': True,
-                'validators': [password_validator],
-                'style': {'input_type': 'password'},
+            "password": {
+                "write_only": True,
+                "validators": [password_validator],
+                "style": {"input_type": "password"},
             }
         }
 
     def create(self, validated_data):
         user = User.objects.create_user(
-            email=validated_data['email'],
-            username=validated_data['username'],
-            password=validated_data['password']
+            email=validated_data["email"],
+            username=validated_data["username"],
+            password=validated_data["password"],
         )
         return user
 
@@ -43,31 +43,39 @@ class UserSerializer(serializers.ModelSerializer):
 
         https://www.django-rest-framework.org/api-guide/fields/#serializermethodfield
         """
-        request = self.context.get('request')
-        return reverse_lazy('subject-list', request=request)
+        request = self.context.get("request")
+        return reverse_lazy("subject-list", request=request)
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
-    old_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
-    new_password = serializers.CharField(write_only=True,
-                                         validators=[password_validator],
-                                         style={'input_type': 'password'})
+    old_password = serializers.CharField(
+        write_only=True, style={"input_type": "password"}
+    )
+    new_password = serializers.CharField(
+        write_only=True,
+        validators=[password_validator],
+        style={"input_type": "password"},
+    )
     password_error_messages = {
-        'password_incorrect': _("Your old password was entered incorrectly. Please enter it again."),
+        "password_incorrect": _(
+            "Your old password was entered incorrectly. Please enter it again."
+        ),
     }
 
     class Meta:
         model = User
-        fields = ['email', 'old_password', 'new_password']
+        fields = ["email", "old_password", "new_password"]
 
     def validate_old_password(self, value):
         if not self.instance.check_password(value):
-            raise serializers.ValidationError(self.password_error_messages['password_incorrect'])
+            raise serializers.ValidationError(
+                self.password_error_messages["password_incorrect"]
+            )
         return value
 
     def update(self, user, validated_data):
-        user.email = validated_data.get('email', user.email)
-        password = validated_data.get('new_password')
+        user.email = validated_data.get("email", user.email)
+        password = validated_data.get("new_password")
         if password:
             user.set_password(password)
         user.save()
@@ -81,37 +89,46 @@ class LoginSerializer(serializers.Serializer):
     username_field = User._meta.get_field(User.USERNAME_FIELD)
 
     auth_error_messages = {
-        'invalid_login': _(
+        "invalid_login": _(
             "Please enter a correct %(username)s and password. Note that both "
             "fields may be case-sensitive."
         ),
-        'inactive': _("This account is inactive."),
+        "inactive": _("This account is inactive."),
     }
 
     def validate(self, attrs):
-        user = authenticate(username=attrs['username_or_email'], password=attrs['password'])
+        user = authenticate(
+            username=attrs["username_or_email"], password=attrs["password"]
+        )
         if not user:
             raise serializers.ValidationError(
-                self.auth_error_messages['invalid_login'] % {'username': self.username_field.verbose_name})
+                self.auth_error_messages["invalid_login"]
+                % {"username": self.username_field.verbose_name}
+            )
         if not user.is_active:
-            raise serializers.ValidationError(self.auth_error_messages['inactive'])
-        return {'user': user}
+            raise serializers.ValidationError(self.auth_error_messages["inactive"])
+        return {"user": user}
 
 
 class PasswordResetSerializer(serializers.Serializer):
     username_or_email = serializers.CharField()
 
-    def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email):
+    def send_mail(
+        self, subject_template_name, email_template_name, context, from_email, to_email
+    ):
         async_send_email.delay(
-            subject_template_name, email_template_name, context, from_email, to_email)
+            subject_template_name, email_template_name, context, from_email, to_email
+        )
 
-    def save(self,
-             request,
-             subject_template_name,
-             email_template_name,
-             from_email,
-             use_https,
-             token_generator):
+    def save(
+        self,
+        request,
+        subject_template_name,
+        email_template_name,
+        from_email,
+        use_https,
+        token_generator,
+    ):
 
         user = self.get_user(self.validated_data["username_or_email"])
 
@@ -126,16 +143,17 @@ class PasswordResetSerializer(serializers.Serializer):
         user_email = getattr(user, email_field_name)
 
         context = {
-            'email': user_email,
-            'domain': domain,
-            'site_name': site_name,
-            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-            'user': user,
-            'token': token_generator.make_token(user),
-            'protocol': 'https' if use_https else 'http',
+            "email": user_email,
+            "domain": domain,
+            "site_name": site_name,
+            "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+            "user": user,
+            "token": token_generator.make_token(user),
+            "protocol": "https" if use_https else "http",
         }
         self.send_mail(
-            subject_template_name, email_template_name, context, from_email, user_email)
+            subject_template_name, email_template_name, context, from_email, user_email
+        )
 
     def get_user(self, email):
         """
@@ -161,9 +179,11 @@ class PasswordResetSerializer(serializers.Serializer):
 
 
 class PasswordConfirmSerializer(serializers.Serializer):
-    new_password = serializers.CharField(write_only=True,
-                                         validators=[password_validator],
-                                         style={'input_type': 'password'})
+    new_password = serializers.CharField(
+        write_only=True,
+        validators=[password_validator],
+        style={"input_type": "password"},
+    )
     uid = serializers.CharField()
     token = serializers.CharField()
 
