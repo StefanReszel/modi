@@ -82,7 +82,7 @@ class CustomProcessFormMixin(GetSubjectObjectMixin):
             messages.success(self.request, self.get_success_message())
         except IntegrityError:
             if "Update" in class_name:
-                self.__assign_object_from_db()
+                self.object.refresh_from_db()
 
             messages.error(self.request, self.get_error_message())
             messages.info(self.request, self.get_info_message())
@@ -94,12 +94,6 @@ class CustomProcessFormMixin(GetSubjectObjectMixin):
     def form_invalid(self, form):
         messages.error(self.request, self.get_error_message())
         return super().form_invalid(form)
-
-    def __assign_object_from_db(self):
-        """
-        Without this, breadcrumbs in HTML template will render improperly.
-        """
-        self.object = self.get_object()
 
     def get_success_message(self):
         return "SUCCESS"
