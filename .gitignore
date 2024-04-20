@@ -8,3 +8,5 @@ db.sqlite3
 .coveragerc
 htmlcov/
 dump.rdb
+.idea
+.python-version
